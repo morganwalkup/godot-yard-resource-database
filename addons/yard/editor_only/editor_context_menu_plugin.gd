@@ -15,7 +15,4 @@ func _popup_menu(paths: PackedStringArray) -> void:
 
 
 func _get_registry_icon() -> Texture2D:
-	return EditorInterface.get_editor_theme().get_icon(
-		"ResourcePreloader",
-		"EditorIcons",
-	)
+	return preload("res://addons/yard/editor_only/assets/yard.svg")
