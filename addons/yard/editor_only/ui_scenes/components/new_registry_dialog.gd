@@ -82,7 +82,7 @@ func popup_with_state(state: RegistryDialogState, dir: String = "") -> void:
 		indexed_properties_line_edit.text = ""
 		registry_path_line_edit.editable = true
 		registry_path_line_edit.focus_mode = Control.FOCUS_ALL
-		registry_path_line_edit.text = dir + "new_registry.tres"
+		registry_path_line_edit.text = dir.path_join("new_registry.tres")
 		registry_path_filesystem_button.icon = AnyIcon.get_icon(&"Folder")
 		registry_path_filesystem_button.tooltip_text = ""
 	elif edited_registry and state == RegistryDialogState.REGISTRY_SETTINGS:
