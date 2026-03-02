@@ -211,7 +211,7 @@ func _populate_open_recent_submenu() -> void:
 				_editor_state_data.clear_recent()
 				return
 			var uid := _editor_state_data.recent_registry_uids[id]
-			if ResourceUID.has_id(ResourceUID.text_to_id(uid)):
+			if RegistryIO.is_uid_valid(uid):
 				select_registry(uid) if _editor_state_data.opened_registries.has(uid) else open_registry(load(uid))
 	)
 

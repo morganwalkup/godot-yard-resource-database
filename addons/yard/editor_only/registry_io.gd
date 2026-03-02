@@ -294,7 +294,7 @@ static func rebuild_property_index(registry: Registry) -> Error:
 		registry._property_index[property] = { }
 
 	for uid: StringName in registry.get_all_uids():
-		if not ResourceLoader.exists(uid):
+		if not is_uid_valid(uid):
 			continue
 		var res := load(uid)
 		if res == null:
@@ -381,7 +381,7 @@ static func is_resource_class_string(class_string: String) -> bool:
 
 static func would_erase_entries(registry: Registry, new_restriction: String) -> bool:
 	for uid: StringName in registry.get_all_uids():
-		if not ResourceLoader.exists(uid):
+		if not is_uid_valid(uid):
 			continue
 		if not is_resource_matching_restriction(registry, load(uid), new_restriction):
 			return true

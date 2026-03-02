@@ -201,14 +201,14 @@ func update_view() -> void:
 	add_entry_container.visible = true
 	_setup_add_entry()
 
-	var resources: Dictionary[StringName, Resource] = current_registry.load_all_blocking() # WARNING: Blocking!
+	var resources: Dictionary[StringName, Resource] = current_registry.load_all_blocking() # WARNING: Blocking! # Source erreur
 	set_columns_data(resources.values())
 	entries_data.clear()
 	for uid in current_registry.get_all_uids():
 		var entry_data := [current_registry.get_string_id(uid), uid]
-		if not ResourceLoader.exists(uid): # WARN: Will throw error in console... Which is dumb.
+		if not RegistryIO.is_uid_valid(uid):
 			entry_data[UID_COLUMN] = "(!) " + uid
-		entry_data.append_array(get_res_row_data(current_registry.load_entry(uid)))
+		entry_data.append_array(get_res_row_data(resources.get(uid, null)))
 		entries_data.append(entry_data)
 
 	dynamic_table.set_columns(_build_columns())
@@ -342,7 +342,7 @@ func _can_display_property(property_info: Dictionary) -> bool:
 
 func _edit_entry_property(entry: StringName, property: StringName, old_value: Variant, new_value: Variant) -> void:
 	var uid := current_registry.get_uid(entry)
-	if not uid or not ResourceLoader.exists(uid):
+	if not uid or not RegistryIO.is_uid_valid(uid):
 		return
 
 	var res := load(entry)
@@ -541,7 +541,7 @@ func _on_cell_selected(row: int, column: int) -> void:
 	#print("Cell selected on row ", row, ", column ", column, " Cell value: ", dynamic_table.get_cell_value(row, column)) #, " Row value: ", dynamic_table.get_row_value(row))
 	if row != -1 and column != -1:
 		var uid: StringName = get_row_resource_uid(row)
-		if ResourceLoader.exists(uid):
+		if RegistryIO.is_uid_valid(uid):
 			_uid_resource_to_inspect = uid
 
 
@@ -562,7 +562,7 @@ func _on_cell_edited(row: int, column: int, old_value: Variant, new_value: Varia
 		var entry := get_row_resource_uid(row)
 		var col_config: DynamicTable.ColumnConfig = dynamic_table.get_column(column)
 		var prop_name: StringName = col_config.identifier
-		if ResourceLoader.exists(entry):
+		if RegistryIO.is_uid_valid(entry):
 			_edit_entry_property(entry, prop_name, old_value, new_value)
 	elif column == STRINGID_COLUMN and new_value:
 		RegistryIO.rename_entry(current_registry, old_value, new_value)
