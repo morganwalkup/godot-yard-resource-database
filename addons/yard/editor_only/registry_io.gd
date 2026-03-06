@@ -41,8 +41,14 @@ static func create_registry_file(
 	_replace_indexed_properties_list(registry, props)
 
 	var save_err := ResourceSaver.save(registry, path, ResourceSaver.FLAG_CHANGE_PATH)
-	EditorInterface.get_resource_filesystem().scan()
 
+	var uid_int := ResourceUID.create_id()
+	ResourceSaver.set_uid(path, uid_int)
+	if not ResourceUID.has_id(uid_int):
+		# Ensures the UID is in the in-memory cache, not just on disk
+		ResourceUID.add_id(uid_int, path)
+
+	EditorInterface.get_resource_filesystem().scan()
 	return save_err
 
 
