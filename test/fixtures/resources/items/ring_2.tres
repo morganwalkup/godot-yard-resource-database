@@ -1,7 +1,7 @@
-[gd_resource type="Resource" load_steps=4 format=3 uid="uid://dwsqjeolbi2j6"]
+[gd_resource type="Resource" script_class="Item" load_steps=4 format=3 uid="uid://dwsqjeolbi2j6"]
 
-[ext_resource type="Script" uid="uid://h6p7lsxyhmyt" path="res://example/Items/item_type.gd" id="1"]
-[ext_resource type="Texture2D" uid="uid://dwi4ioxeauoc4" path="res://example/Items/item_icons/items.png" id="2_a2wrg"]
+[ext_resource type="Script" uid="uid://h6p7lsxyhmyt" path="res://test/fixtures/classes/item_type.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://dwi4ioxeauoc4" path="res://test/fixtures/resources/items/item_icons/items.png" id="2_a2wrg"]
 
 [sub_resource type="AtlasTexture" id="1"]
 atlas = ExtResource("2_a2wrg")
@@ -11,9 +11,6 @@ region = Rect2(12, 192, 12, 12)
 script = ExtResource("1")
 name = "ring_2"
 description = "desc_ring_2"
-max_stack_count = 1
-in_inventory_width = 1
-in_inventory_height = 1
 texture = SubResource("1")
 slot_flags = 16
 default_properties = {
