@@ -6,7 +6,7 @@ body:
     attributes:
       value: |
         - Write a descriptive issue title above.
-        - Search [open](../../issues) and [closed](../../issues?q=is%3Aissue+is%3Aclosed) issues to ensure it has not already been reported.
+        - Search [open](https://github.com/elliotfontaine/yard-godot/issues) and [closed](https://github.com/elliotfontaine/yard-godot/issues?q=is%3Aissue+is%3Aclosed) issues to ensure it has not already been reported.
         - Make sure you are using the latest plugin version before reporting.
 
   - type: input
