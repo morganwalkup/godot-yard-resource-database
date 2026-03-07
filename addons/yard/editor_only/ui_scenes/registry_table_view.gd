@@ -464,7 +464,22 @@ func _toggle_add_entry_button() -> void:
 
 
 func _toggle_edit_context_menu_items() -> void:
-	edit_context_menu.set_item_disabled(edit_context_menu.get_item_index(EditMenuAction.DELETE_ENTRIES), dynamic_table.focused_row == -1)
+	var row := dynamic_table.focused_row
+	var col := dynamic_table.focused_col
+	var has_selected_cell := -1 not in [row, col]
+	var has_selected_row: = row != -1
+	var cell_value: Variant = dynamic_table.get_cell_value(row, col) if has_selected_cell else null
+	var cant_be_cut := col in [UID_COLUMN, STRINGID_COLUMN]
+	var is_resource_cell := has_selected_cell and cell_value is Resource
+
+	edit_context_menu.set_item_disabled(edit_context_menu.get_item_index(EditMenuAction.DELETE_ENTRIES), !has_selected_row)
+	edit_context_menu.set_item_disabled(edit_context_menu.get_item_index(EditMenuAction.COPY_STRING_ID), !has_selected_row)
+	edit_context_menu.set_item_disabled(edit_context_menu.get_item_index(EditMenuAction.COPY_UID), !has_selected_row)
+	edit_context_menu.set_item_disabled(edit_context_menu.get_item_index(EditMenuAction.SHOW_IN_FILESYSTEM), !has_selected_row)
+	edit_context_menu.set_item_disabled(edit_context_menu.get_item_index(EditMenuAction.CUT_CELL_VALUE), !has_selected_cell or cant_be_cut)
+	edit_context_menu.set_item_disabled(edit_context_menu.get_item_index(EditMenuAction.COPY_CELL_VALUE), !has_selected_cell)
+	edit_context_menu.set_item_disabled(edit_context_menu.get_item_index(EditMenuAction.PASTE_TO_CELL), !has_selected_cell)
+	edit_context_menu.set_item_disabled(edit_context_menu.get_item_index(EditMenuAction.INSPECT_RESOURCE), !is_resource_cell)
 
 	if dynamic_table.selected_rows.size() > 1:
 		edit_context_menu.set_item_text(
@@ -473,20 +488,6 @@ func _toggle_edit_context_menu_items() -> void:
 		)
 	else:
 		edit_context_menu.set_item_text(edit_context_menu.get_item_index(EditMenuAction.DELETE_ENTRIES), "Delete Entry")
-
-	var has_selected_cell := -1 not in [dynamic_table.focused_row, dynamic_table.focused_col]
-	var cant_be_cut := dynamic_table.focused_col in [UID_COLUMN, STRINGID_COLUMN]
-	edit_context_menu.set_item_disabled(edit_context_menu.get_item_index(EditMenuAction.CUT_CELL_VALUE), !has_selected_cell or cant_be_cut)
-	edit_context_menu.set_item_disabled(edit_context_menu.get_item_index(EditMenuAction.COPY_CELL_VALUE), !has_selected_cell)
-	edit_context_menu.set_item_disabled(edit_context_menu.get_item_index(EditMenuAction.PASTE_TO_CELL), !has_selected_cell)
-
-	var is_resource_cell := has_selected_cell and dynamic_table.get_column(dynamic_table.focused_col).is_resource_column()
-	edit_context_menu.set_item_disabled(edit_context_menu.get_item_index(EditMenuAction.INSPECT_RESOURCE), !is_resource_cell)
-
-	var has_selected_row: = dynamic_table.focused_row != -1
-	edit_context_menu.set_item_disabled(edit_context_menu.get_item_index(EditMenuAction.COPY_STRING_ID), !has_selected_row)
-	edit_context_menu.set_item_disabled(edit_context_menu.get_item_index(EditMenuAction.COPY_UID), !has_selected_row)
-	edit_context_menu.set_item_disabled(edit_context_menu.get_item_index(EditMenuAction.SHOW_IN_FILESYSTEM), !has_selected_row)
 
 
 func do_edit_menu_action(action_id: int) -> void:
