@@ -604,7 +604,7 @@ func _open_path_editor(row: int, col: int) -> void:
 	if column.property_hint in [PROPERTY_HINT_DIR]:
 		_path_editor.file_mode = EditorFileDialog.FILE_MODE_OPEN_DIR
 		_path_editor.title = "Select a Directory"
-	var current_path: String = get_cell_value(row, col)
+	var current_path := ResourceUID.ensure_path(get_cell_value(row, col))
 	_path_editor.current_dir = current_path.get_base_dir()
 	_path_editor.current_path = current_path
 	_path_editor.popup_centered_ratio(0.55)
