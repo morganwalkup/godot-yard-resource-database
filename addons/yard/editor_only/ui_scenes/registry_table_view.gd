@@ -50,6 +50,7 @@ var current_registry: Registry:
 	set(new):
 		current_registry = new
 		current_cache_data = RegistryCacheData.load_or_default(new) if current_registry else null
+		dynamic_table.ordering_data(STRINGID_COLUMN, true)
 		update_view()
 var current_cache_data: RegistryCacheData
 
@@ -212,6 +213,10 @@ func update_view() -> void:
 		dynamic_table.set_data(empty_data)
 		return
 
+	var table_state := [dynamic_table.focused_row, dynamic_table.focused_col, dynamic_table.selected_rows, dynamic_table._last_column_sorted, dynamic_table._ascending]
+	var focus_owner := get_viewport().gui_get_focus_owner() if get_viewport() else null
+	var table_had_focus := focus_owner and (dynamic_table == focus_owner or dynamic_table.is_ancestor_of(focus_owner))
+
 	add_entry_container.visible = true
 	_setup_add_entry()
 
@@ -242,7 +247,12 @@ func update_view() -> void:
 					column.current_width = current_cache_data.property_columns_widths[prop_name]
 
 	dynamic_table.set_data(entries_data)
-	dynamic_table.ordering_data(STRINGID_COLUMN, true)
+
+	dynamic_table.ordering_data(table_state[3], table_state[4])
+	if table_had_focus:
+		dynamic_table.grab_focus()
+		dynamic_table.set_selected_cell(table_state[0], table_state[1])
+		dynamic_table.selected_rows = table_state[2]
 
 
 func is_property_disabled(property_info: Dictionary) -> bool:

@@ -267,7 +267,10 @@ func set_columns(columns: Array[ColumnConfig]) -> void:
 
 
 func get_column(index: int) -> ColumnConfig:
-	return _columns[index]
+	if index in range(_columns.size()):
+		return _columns[index]
+	else:
+		return null
 
 
 func set_data(new_data: Array) -> void:
@@ -295,7 +298,9 @@ func set_data(new_data: Array) -> void:
 	queue_redraw()
 
 
-func ordering_data(column_index: int, ascending: bool = true) -> int:
+func ordering_data(column_index: int, ascending: bool = true) -> void:
+	if not get_column(column_index):
+		return
 	_finish_editing(false)
 	_last_column_sorted = column_index
 	_store_selected_rows()
@@ -325,7 +330,6 @@ func ordering_data(column_index: int, ascending: bool = true) -> int:
 
 	_restore_selected_rows()
 	queue_redraw()
-	return -1
 
 
 func update_cell(row: int, col: int, value: Variant) -> void:
