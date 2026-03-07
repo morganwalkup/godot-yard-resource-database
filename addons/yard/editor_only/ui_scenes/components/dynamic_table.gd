@@ -1324,6 +1324,13 @@ func _handle_key_input(event: InputEventKey) -> void:
 			emit_multiple_selection_signal = true
 		key_operation_performed = true
 
+	if keycode in [KEY_ENTER, KEY_KP_ENTER]:
+		if not -1 in [current_focused_r, current_focused_c]:
+			_start_cell_editing(current_focused_r, current_focused_c)
+			key_operation_performed = true
+		else:
+			event_consumed = false
+
 	elif keycode == KEY_HOME:
 		if _total_rows > 0:
 			new_focused_r = 0
