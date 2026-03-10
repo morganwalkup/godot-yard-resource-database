@@ -1299,6 +1299,13 @@ func _is_clicking_progress_bar(mouse_pos: Vector2) -> bool:
 	return true
 
 
+func _toggle_checkbox(row: int, col: int) -> void:
+	var old_val := bool(get_cell_value(row, col))
+	var new_val := !old_val
+	update_cell(row, col, new_val)
+	cell_edited.emit(row, col, old_val, new_val)
+
+
 func _ensure_row_visible(row_idx: int) -> void:
 	if _total_rows == 0 or row_height == 0 or not _v_scroll.visible:
 		return
@@ -1381,6 +1388,9 @@ func _handle_key_input(event: InputEventKey) -> void:
 
 	if keycode in [KEY_ENTER, KEY_KP_ENTER]:
 		if not -1 in [current_focused_r, current_focused_c]:
+			if get_column(current_focused_c).is_boolean_column():
+				_toggle_checkbox(current_focused_r, current_focused_c)
+			else:
 			_start_cell_editing(current_focused_r, current_focused_c)
 			key_operation_performed = true
 		else:
@@ -1650,31 +1660,22 @@ func _handle_progress_drag(mouse_pos: Vector2) -> void:
 
 func _handle_checkbox_click(mouse_pos: Vector2) -> bool:
 	var row := _get_row_at_y(mouse_pos.y)
-	if row < 0:
+	var col := _get_col_at_x(mouse_pos.x)
+	if -1 in [row, col]:
 		return false
 
-	var clicked_col_idx := _get_col_at_x(mouse_pos.x)
-	if clicked_col_idx < 0:
-		return false
-
-	var column := _columns[clicked_col_idx]
+	var column := _columns[col]
 	if not column.is_boolean_column():
 		return false
 
-	if focused_row != row or focused_col != clicked_col_idx:
-		focused_row = row
-		focused_col = clicked_col_idx
-		if not selected_rows.has(row) or selected_rows.size() > 1:
-			selected_rows.clear()
-			selected_rows.append(row)
-			_anchor_row = row
-		cell_selected.emit(focused_row, focused_col)
+	var rect := _get_cell_rect(row, col)
+	var icon: Texture2D = get_theme_icon(&"checked", &"CheckBox")
+	var icon_rect := Rect2(rect.get_center() - icon.get_size() / 2, icon.get_size())
+	if icon_rect.has_point(mouse_pos):
+		_toggle_checkbox(row, col)
+		return true
 
-	var old_val: Variant = get_cell_value(row, clicked_col_idx)
-	var new_val := not bool(old_val)
-	update_cell(row, clicked_col_idx, new_val)
-	cell_edited.emit(row, clicked_col_idx, old_val, new_val)
-	return true
+		return false
 
 
 func _handle_cell_click(mouse_pos: Vector2, event: InputEventMouseButton) -> void:
