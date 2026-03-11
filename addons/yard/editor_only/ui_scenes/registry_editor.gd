@@ -175,6 +175,8 @@ func select_registry(uid: String) -> void:
 	RegistryIO.sync_registry_entries_from_scan_dir(registry)
 	registry_table_view.current_registry = registry
 	_toggle_visibility_topbar_buttons()
+	_toggle_file_menu_items()
+	_toggle_registry_context_menu_items()
 
 
 func unselect_registry() -> void:
@@ -499,6 +501,8 @@ func _do_file_menu_action(action_id: int) -> void:
 		FileMenuAction.SORT:
 			_sort_opened_registries_by_filename()
 			_update_registries_itemlist()
+	_toggle_file_menu_items()
+	_toggle_registry_context_menu_items()
 
 
 func _reorder_opened_registries_move(uid: String, delta: int) -> bool:
