@@ -352,13 +352,14 @@ func update_cell(row: int, col: int, value: Variant) -> void:
 
 
 func get_cell_value(row: int, col: int) -> Variant:
-	if row >= 0 and row < _data.size() and col >= 0 and col < _data[row].size():
-		var raw: Variant = _data[row][col]
-		if get_column(col).is_numeric_column() and not _is_numeric_value(raw):
-			return 0
-		else:
-			return raw
-	return null
+	if row < 0 or row >= _data.size() or col < 0 or col >= _data[row].size():
+		return null
+	var raw: Variant = _data[row][col]
+	if is_cell_invalid(row, col):
+		return raw
+	if get_column(col).is_numeric_column() and not _is_numeric_value(raw):
+		return 0
+	return raw
 
 
 func set_selected_cell(row: int, col: int) -> void:
@@ -403,6 +404,11 @@ func select_all_rows() -> void:
 
 	_ensure_row_visible(focused_row)
 	_ensure_col_visible(focused_col)
+
+
+func is_cell_invalid(row: int, col: int) -> bool:
+	var raw: Variant = _data[row][col]
+	return raw is String and raw == CELL_INVALID
 
 #endregion
 
@@ -529,7 +535,7 @@ func _restore_selected_rows() -> void:
 
 func _start_cell_editing(row: int, col: int) -> void:
 	var column := get_column(col)
-	if str(get_cell_value(row, col)) == CELL_INVALID:
+	if is_cell_invalid(row, col):
 		return
 
 	if column.is_color_column():
@@ -787,9 +793,9 @@ func _draw_cells_column_range(row: int, row_y: float, col_from: int, col_to: int
 		if col_x + col.current_width > clip_left and col_x < vis_w:
 			var cell_rect := Rect2(col_x, row_y, col.current_width, row_height)
 			draw_line(Vector2(col_x, row_y), Vector2(col_x, row_y + row_height), grid_color)
+			_dispatch_cell_draw(cell_rect, row, col_idx)
 			if row == focused_row and col_idx == focused_col:
 				draw_rect(cell_rect.grow_individual(-1, -1, -2, -2), selected_cell_back_color, false, 2.0)
-			_dispatch_cell_draw(cell_rect, row, col_idx)
 		col_x += col.current_width
 	# Right border of the last column in the whole table
 	if col_to == _columns.size() and col_x <= vis_w and col_x > clip_left:

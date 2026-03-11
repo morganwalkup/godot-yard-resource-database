@@ -282,18 +282,21 @@ func do_edit_menu_action(action_id: int) -> void:
 			var row := dynamic_table.focused_row
 			var col := dynamic_table.focused_col
 			var value: Variant = dynamic_table.get_cell_value(row, col)
-			clipboard = value
-			_on_cell_edited(row, col, value, null)
+			if not dynamic_table.is_cell_invalid(row, col):
+				clipboard = value
+				_on_cell_edited(row, col, value, null)
 		EditMenuAction.COPY_CELL_VALUE:
 			var row := dynamic_table.focused_row
 			var col := dynamic_table.focused_col
 			var value: Variant = dynamic_table.get_cell_value(row, col)
-			clipboard = value
+			if not dynamic_table.is_cell_invalid(row, col):
+				clipboard = value
 		EditMenuAction.PASTE_TO_CELL:
 			var row := dynamic_table.focused_row
 			var col := dynamic_table.focused_col
 			var value: Variant = dynamic_table.get_cell_value(row, col)
-			_on_cell_edited(row, col, value, clipboard)
+			if not dynamic_table.is_cell_invalid(row, col):
+				_on_cell_edited(row, col, value, clipboard)
 		EditMenuAction.SELECT_ALL:
 			_select_all()
 		EditMenuAction.INVERT_SELECTION:
