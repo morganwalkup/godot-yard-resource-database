@@ -278,10 +278,7 @@ func set_columns(columns: Array[ColumnConfig]) -> void:
 
 
 func get_column(index: int) -> ColumnConfig:
-	if index in range(_columns.size()):
-		return _columns[index]
-	else:
-		return null
+	return _columns[index] if index in range(_columns.size()) else null
 
 
 func set_data(new_data: Array) -> void:
@@ -1330,192 +1327,10 @@ func _ensure_col_visible(col_idx: int) -> void:
 	_h_scroll.value = clamp(_h_scroll.value, 0.0, _h_scroll.max_value)
 
 
-func _handle_key_input(event: InputEventKey) -> void:
-	if _text_editor_line_edit.visible: # Let the LineEdit handle input during editing
-		if event.keycode == KEY_ESCAPE: # Except ESC to cancel
-			_finish_editing(false)
-			get_viewport().set_input_as_handled()
-		return
-
-	var keycode := event.keycode
-	var is_shift := event.is_shift_pressed()
-	var is_ctrl := event.is_ctrl_pressed()
-	var is_meta := event.is_meta_pressed() # Cmd on Mac
-	var is_ctrl_cmd := is_ctrl or is_meta # For actions like Ctrl+A / Cmd+A
-
-	var current_focused_r := focused_row
-	var current_focused_c := focused_col
-
-	var new_focused_r := current_focused_r
-	var new_focused_c := current_focused_c
-
-	var key_operation_performed := false # Flag to track whether a key operation modified the state
-	var event_consumed := true # Assume the event will be consumed unless stated otherwise
-	var emit_multiple_selection_signal := false
-
-	if is_ctrl_cmd and keycode == KEY_A:
-		if _total_rows > 0:
-			select_all_rows()
-			emit_multiple_selection_signal = true
-		key_operation_performed = true
-
-	if keycode in [KEY_ENTER, KEY_KP_ENTER]:
-		if not -1 in [current_focused_r, current_focused_c]:
-			if get_column(current_focused_c).is_boolean_column():
-				_toggle_checkbox(current_focused_r, current_focused_c)
-			else:
-				_start_cell_editing(current_focused_r, current_focused_c)
-				key_operation_performed = true
-		else:
-			event_consumed = false
-
-	elif keycode == KEY_HOME:
-		if _total_rows > 0:
-			new_focused_r = 0
-			new_focused_c = 0 if _columns.size() > 0 else -1
-			key_operation_performed = true
-		else:
-			event_consumed = false # No rows, no action
-
-	elif keycode == KEY_END:
-		if _total_rows > 0:
-			new_focused_r = _total_rows - 1
-			new_focused_c = (_columns.size() - 1) if _columns.size() > 0 else -1
-			key_operation_performed = true
-		else:
-			event_consumed = false # No rows, no action
-
-	# Other navigation keys (generally require an initial focus)
-	elif current_focused_r != -1 and current_focused_c != -1:
-		match keycode:
-			KEY_UP:
-				new_focused_r = max(0, current_focused_r - 1)
-				key_operation_performed = true
-			KEY_DOWN:
-				new_focused_r = min(_total_rows - 1, current_focused_r + 1)
-				key_operation_performed = true
-			KEY_LEFT:
-				new_focused_c = max(0, current_focused_c - 1)
-				key_operation_performed = true
-			KEY_RIGHT:
-				new_focused_c = min(_columns.size() - 1, current_focused_c + 1)
-				key_operation_performed = true
-			KEY_PAGEUP:
-				var page_row_count := floori((size.y - header_height) / row_height) if row_height > 0 else 10
-				page_row_count = max(1, page_row_count) # Ensure scrolling of at least 1 row
-				new_focused_r = max(0, current_focused_r - page_row_count)
-				key_operation_performed = true
-			KEY_PAGEDOWN:
-				var page_row_count := floori((size.y - header_height) / row_height) if row_height > 0 else 10
-				page_row_count = max(1, page_row_count)
-				new_focused_r = min(_total_rows - 1, current_focused_r + page_row_count)
-				key_operation_performed = true
-			KEY_SPACE:
-				if is_ctrl_cmd:
-					if selected_rows.has(current_focused_r):
-						selected_rows.erase(current_focused_r)
-					else:
-						if not selected_rows.has(current_focused_r):
-							selected_rows.append(current_focused_r)
-					_anchor_row = current_focused_r
-					key_operation_performed = true
-				else:
-					event_consumed = false
-			KEY_ESCAPE:
-				if selected_rows.size() > 0 or focused_row != -1: # Act only if there is a selection or focus
-					selected_rows.clear()
-					_previous_sort_selected_rows.clear()
-					_anchor_row = -1
-					focused_row = -1
-					focused_col = -1
-					key_operation_performed = true
-					set_selected_cell(-1, -1)
-				else:
-					event_consumed = false # No selection/focus to cancel
-
-	else: # No initial focus for most navigation keys, or unhandled key above
-		event_consumed = false
-
-	# If the focus changed or a key operation modified the selection state
-	if key_operation_performed and (new_focused_r != current_focused_r or new_focused_c != current_focused_c or keycode in [KEY_HOME, KEY_END, KEY_SPACE, KEY_A]):
-		var old_focused_r := focused_row # Save previous focus for anchor
-
-		focused_row = new_focused_r
-		focused_col = new_focused_c
-
-		# Selection update logic
-		if not (is_ctrl_cmd and keycode == KEY_A): # Ctrl+A handles its own selection
-			#var emit_multiple_selection_signal = false
-			if is_shift:
-				# Set anchor if not defined, using previous focus or 0 as fallback
-				if _anchor_row == -1:
-					_anchor_row = old_focused_r if old_focused_r != -1 else 0
-
-				if focused_row != -1: # Only if the new focused row is valid
-					selected_rows.clear()
-					var start_r: int = min(_anchor_row, focused_row)
-					var end_r: int = max(_anchor_row, focused_row)
-					for i in range(start_r, end_r + 1):
-						if i >= 0 and i < _total_rows: # Check index validity
-							if not selected_rows.has(i):
-								selected_rows.append(i)
-								emit_multiple_selection_signal = true
-				# If focused_row is -1 (e.g. empty table), selected_rows stays empty or cleared
-				#if emit_multiple_selection_signal:
-				# The selected_rows array already contains the correct indices
-				#multiple_rows_selected.emit(selected_rows)
-
-			elif is_ctrl_cmd and not (keycode == KEY_SPACE):
-				# Ctrl + Arrows/Pg/Home/End: move focus only, do not change selection.
-				# The anchor does not change to allow future Shift selections.
-				pass
-			elif not (keycode == KEY_SPACE and is_ctrl_cmd):
-				# No modifier (or Ctrl not for pure navigation): select only the focused row
-				if focused_row != -1: # Only if the new focused row is valid
-					selected_rows.clear()
-					selected_rows.append(focused_row)
-					_anchor_row = focused_row
-					#emit_multiple_selection_signal = true
-				else: # The new focused row is not valid (e.g. empty table)
-					selected_rows.clear()
-					_anchor_row = -1
-
-		if focused_row != -1:
-			_ensure_row_visible(focused_row)
-			_ensure_col_visible(focused_col)
-
-		if current_focused_r != focused_row or current_focused_c != focused_col or (keycode == KEY_SPACE and is_ctrl_cmd):
-			# Emit the signal only if the focus actually changed or if Ctrl+Space modified the selection
-			cell_selected.emit(focused_row, focused_col)
-			pass
-
-		if emit_multiple_selection_signal:
-			# The selected_rows array already contains the correct indices
-			multiple_rows_selected.emit(selected_rows)
-
-	if key_operation_performed:
-		queue_redraw()
-		get_viewport().set_input_as_handled()
-	elif event_consumed: # Consume the event if it was partially handled (e.g. key recognized but no action)
-		#get_viewport().set_input_as_handled()
-		pass
-
-
 func _handle_pan_gesture(event: InputEventPanGesture) -> void:
 	_apply_pan_axis(event.delta.y, _v_scroll, Vector2.AXIS_Y)
 	if abs(event.delta.x) > 0.05:
 		_apply_pan_axis(event.delta.x, _h_scroll, Vector2.AXIS_X)
-
-
-func _apply_pan_axis(delta: float, scroll: ScrollBar, axis: int) -> void:
-	if not scroll.visible:
-		return
-	if sign(delta) != sign(_pan_delta_accumulation[axis]):
-		_pan_delta_accumulation[axis] = 0.0
-	_pan_delta_accumulation[axis] += delta
-	if abs(_pan_delta_accumulation[axis]) >= 1.0:
-		scroll.value += sign(_pan_delta_accumulation[axis]) * _v_scroll.step #scroll.step
-		_pan_delta_accumulation[axis] -= sign(_pan_delta_accumulation[axis])
 
 
 func _handle_mouse_motion(event: InputEventMouseMotion) -> void:
@@ -1546,75 +1361,69 @@ func _handle_mouse_motion(event: InputEventMouseMotion) -> void:
 
 
 func _handle_mouse_button(event: InputEventMouseButton) -> void:
-	if event.button_index == MOUSE_BUTTON_LEFT:
-		var m_pos := event.position
-		if event.pressed:
-			# Double-click handling
-			if (
-				_click_count == 1
-				and _double_click_timer.time_left > 0
-				and _last_click_pos.distance_to(m_pos) < _click_position_threshold
-			):
-				_click_count = 0
-				_double_click_timer.stop()
-
-				if m_pos.y < header_height:
-					_handle_header_double_click(m_pos) # <-- NEW CALL
-				else:
-					_handle_double_click(m_pos)
+	match event.button_index:
+		MOUSE_BUTTON_LEFT:
+			if event.pressed:
+				_handle_left_press(event)
 			else:
-				# Single-click handling
-				_click_count = 1
-				_last_click_pos = m_pos
-				_double_click_timer.start()
+				_handle_left_release()
+		MOUSE_BUTTON_RIGHT:
+			if event.pressed:
+				_handle_right_click(event.position)
+		MOUSE_BUTTON_WHEEL_UP:
+			_v_scroll.value = maxf(0.0, _v_scroll.value - _v_scroll.step)
+		MOUSE_BUTTON_WHEEL_DOWN:
+			_v_scroll.value = minf(_v_scroll.max_value, _v_scroll.value + _v_scroll.step)
 
-				if m_pos.y < header_height:
-					# If the filter LineEdit is visible, do not process single header clicks
-					if not _filter_line_edit.visible:
-						_handle_header_click(m_pos)
-				else:
-					_handle_checkbox_click(m_pos)
-					_handle_cell_click(m_pos, event)
 
-					if _is_clicking_progress_bar(m_pos):
-						var row := _get_row_at_y(m_pos.y)
-						var col := _get_col_at_x(m_pos.x)
-						_dragging_start_value = get_cell_value(row, col)
-						_dragging_progress = true
-						_progress_drag_row = row
-						_progress_drag_col = col
+func _handle_left_press(event: InputEventMouseButton) -> void:
+	var m_pos := event.position
+	var is_double_click := (
+		_click_count == 1
+		and _double_click_timer.time_left > 0
+		and _last_click_pos.distance_to(m_pos) < _click_position_threshold
+	)
 
-				if _mouse_over_divider >= 0:
-					_resizing_column = _mouse_over_divider
-					_resizing_start_pos = int(m_pos.x)
-					_resizing_start_width = int(get_column(_resizing_column).current_width)
+	if is_double_click:
+		_click_count = 0
+		_double_click_timer.stop()
+		if m_pos.y < header_height:
+			_handle_header_double_click(m_pos)
+		else:
+			_handle_double_click(m_pos)
+		return
 
-		else: # Mouse button released
-			if _dragging_progress:
-				var new_val: Variant = get_cell_value(_progress_drag_row, _progress_drag_col)
-				update_cell(_progress_drag_row, _progress_drag_col, new_val)
-				cell_edited.emit(_progress_drag_row, _progress_drag_col, _dragging_start_value, new_val)
-			_resizing_column = -1
-			_dragging_progress = false
-			_progress_drag_row = -1
-			_progress_drag_col = -1
+	_click_count = 1
+	_last_click_pos = m_pos
+	_double_click_timer.start()
 
-	elif event.button_index == MOUSE_BUTTON_RIGHT and event.pressed:
-		_handle_right_click(event.position) # Use event.position
+	if m_pos.y < header_height:
+		if not _filter_line_edit.visible:
+			_handle_header_click(m_pos)
+	else:
+		_handle_checkbox_click(m_pos)
+		_handle_cell_click(m_pos, event)
+		if _is_clicking_progress_bar(m_pos):
+			_progress_drag_row = _get_row_at_y(m_pos.y)
+			_progress_drag_col = _get_col_at_x(m_pos.x)
+			_dragging_start_value = get_cell_value(_progress_drag_row, _progress_drag_col)
+			_dragging_progress = true
 
-	elif event.button_index == MOUSE_BUTTON_WHEEL_UP:
-		if _v_scroll.visible:
-			_v_scroll.value = max(
-				0,
-				_v_scroll.value - _v_scroll.step * 1,
-			)
+	if _mouse_over_divider >= 0:
+		_resizing_column = _mouse_over_divider
+		_resizing_start_pos = int(m_pos.x)
+		_resizing_start_width = int(get_column(_resizing_column).current_width)
 
-	elif event.button_index == MOUSE_BUTTON_WHEEL_DOWN:
-		if _v_scroll.visible:
-			_v_scroll.value = min(
-				_v_scroll.max_value,
-				_v_scroll.value + _v_scroll.step * 1,
-			)
+
+func _handle_left_release() -> void:
+	if _dragging_progress:
+		var new_val: Variant = get_cell_value(_progress_drag_row, _progress_drag_col)
+		update_cell(_progress_drag_row, _progress_drag_col, new_val)
+		cell_edited.emit(_progress_drag_row, _progress_drag_col, _dragging_start_value, new_val)
+	_resizing_column = -1
+	_dragging_progress = false
+	_progress_drag_row = -1
+	_progress_drag_col = -1
 
 
 func _handle_progress_drag(mouse_pos: Vector2) -> void:
@@ -1631,8 +1440,7 @@ func _handle_progress_drag(mouse_pos: Vector2) -> void:
 	if bar_w <= 0:
 		return
 
-	var column := get_column(_progress_drag_col)
-	var range_cfg := column.get_range_config()
+	var range_cfg := get_column(_progress_drag_col).get_range_config()
 	var weight := (mouse_pos.x - bar_x) / bar_w
 	var new_progress: float = snappedf(
 		lerpf(range_cfg.get(&"min"), range_cfg.get(&"max"), weight),
@@ -1655,8 +1463,7 @@ func _handle_checkbox_click(mouse_pos: Vector2) -> bool:
 	if -1 in [row, col]:
 		return false
 
-	var column := get_column(col)
-	if not column.is_boolean_column():
+	if not get_column(col).is_boolean_column():
 		return false
 
 	var rect := _get_cell_rect(row, col)
@@ -1670,71 +1477,39 @@ func _handle_checkbox_click(mouse_pos: Vector2) -> bool:
 
 
 func _handle_cell_click(mouse_pos: Vector2, event: InputEventMouseButton) -> void:
-	# TODO: clean / refactor method
 	if _editing_cell[1] >= 0:
 		var column := get_column(_editing_cell[1])
-		if column.is_resource_column() or column.is_path_column() or column.is_enum_column():
-			_finish_editing(false)
-		else:
-			_finish_editing(true)
+		var save := not (column.is_resource_column() or column.is_path_column() or column.is_enum_column())
+		_finish_editing(save)
 
 	var clicked_row := _get_row_at_y(mouse_pos.y)
-	if clicked_row < 0:
-		return
-
 	var clicked_col := _get_col_at_x(mouse_pos.x)
-	if clicked_col == -1:
+	if clicked_row < 0 or clicked_col == -1:
 		return
 
 	focused_row = clicked_row
 	focused_col = clicked_col
 
-	var is_shift := event.is_shift_pressed()
-	var is_ctrl_cmd := event.is_ctrl_pressed() or event.is_meta_pressed() # Ctrl or Cmd
-
-	var emit_multiple_selection_signal := false
-
-	if is_shift and _anchor_row != -1:
+	if event.is_shift_pressed() and _anchor_row != -1:
 		selected_rows.clear()
-		var start_range: int = min(_anchor_row, focused_row)
-		var end_range: int = max(_anchor_row, focused_row)
-		for i in range(start_range, end_range + 1):
+		for i in range(mini(_anchor_row, focused_row), maxi(_anchor_row, focused_row) + 1):
 			selected_rows.append(i)
-		# After a Shift selection, if more than one row is selected, prepare to emit.
-		if selected_rows.size() > 1:
-			emit_multiple_selection_signal = true
-	elif is_ctrl_cmd:
+	elif event.is_ctrl_pressed() or event.is_meta_pressed():
 		if selected_rows.has(focused_row):
 			selected_rows.erase(focused_row)
 		else:
 			selected_rows.append(focused_row)
-		_anchor_row = focused_row # Update the anchor for future Shift selections
-		# After a Ctrl/Cmd selection, if more than one row is selected, prepare to emit.
-		if selected_rows.size() > 1:
-			emit_multiple_selection_signal = true
-		# If the selection was multiple and now is no longer multiple (because Ctrl-click deselects),
-		# you might still want to emit to indicate a change from a multiple-selection state.
-		# However, the requirement is "when a multiple selection EXISTS".
-		# So if selected_rows.size() <= 1, we do not set emit_multiple_selection_signal = true.
-	else: # Single click without modifiers
+		_anchor_row = focused_row
+	else:
 		selected_rows.clear()
 		selected_rows.append(focused_row)
 		_anchor_row = focused_row
-		# In this case, selected_rows.size() will be 1.
-		# If the previous selection was multiple and now is single,
-		# we do not emit multiple_rows_selected because a multiple selection no longer exists.
 
-	cell_selected.emit(focused_row, focused_col) # Always emit for a valid cell click
+	cell_selected.emit(focused_row, focused_col)
 	_ensure_col_visible(focused_col)
 
-	# Emit the new signal if a multiple selection was identified
-	if emit_multiple_selection_signal:
-		# selected_rows already contains the correct indices
+	if selected_rows.size() > 1:
 		multiple_rows_selected.emit(selected_rows)
-	# Also consider the case where the selection transitions from multiple to single/none
-	# due to a Ctrl operation. If you want a signal for that "change" as well,
-	# the logic here should be slightly different. But sticking to "when it exists",
-	# the current approach is correct.
 
 	queue_redraw()
 
@@ -1782,6 +1557,152 @@ func _handle_header_double_click(mouse_pos: Vector2) -> void:
 	if col_idx != -1:
 		_ensure_col_visible(col_idx)
 		_start_filtering(col_idx)
+
+
+func _handle_key_input(event: InputEventKey) -> void:
+	if _text_editor_line_edit.visible:
+		if event.keycode == KEY_ESCAPE:
+			_finish_editing(false)
+			get_viewport().set_input_as_handled()
+		return
+
+	var keycode := event.keycode
+	var is_shift := event.is_shift_pressed()
+	var is_ctrl_cmd := event.is_ctrl_pressed() or event.is_meta_pressed()
+	var is_cell_focused := focused_row != -1 and focused_col != -1
+
+	var new_row := focused_row
+	var new_col := focused_col
+
+	match keycode:
+		KEY_ENTER, KEY_KP_ENTER:
+			if not is_cell_focused:
+				return
+			if get_column(focused_col).is_boolean_column():
+				_toggle_checkbox(focused_row, focused_col)
+			else:
+				_start_cell_editing(focused_row, focused_col)
+			_finalize_key_operation()
+			return
+		KEY_A:
+			if is_ctrl_cmd and _total_rows > 0:
+				select_all_rows()
+				multiple_rows_selected.emit(selected_rows)
+				_finalize_key_operation()
+			return
+		KEY_ESCAPE:
+			if selected_rows.is_empty() and focused_row == -1:
+				return
+			set_selected_cell(-1, -1)
+			_previous_sort_selected_rows.clear()
+			_finalize_key_operation()
+			return
+		KEY_HOME:
+			if _total_rows == 0:
+				return
+			new_row = 0
+			new_col = 0 if not _columns.is_empty() else -1
+		KEY_END:
+			if _total_rows == 0:
+				return
+			new_row = _total_rows - 1
+			new_col = _columns.size() - 1 if not _columns.is_empty() else -1
+		KEY_UP:
+			if not is_cell_focused:
+				return
+			new_row = maxi(0, focused_row - 1)
+		KEY_DOWN:
+			if not is_cell_focused:
+				return
+			new_row = mini(_total_rows - 1, focused_row + 1)
+		KEY_LEFT:
+			if not is_cell_focused:
+				return
+			new_col = maxi(0, focused_col - 1)
+		KEY_RIGHT:
+			if not is_cell_focused:
+				return
+			new_col = mini(_columns.size() - 1, focused_col + 1)
+		KEY_PAGEUP:
+			if not is_cell_focused:
+				return
+			new_row = maxi(0, focused_row - _page_row_count())
+		KEY_PAGEDOWN:
+			if not is_cell_focused:
+				return
+			new_row = mini(_total_rows - 1, focused_row + _page_row_count())
+		KEY_SPACE:
+			if not is_cell_focused or not is_ctrl_cmd:
+				return
+			if selected_rows.has(focused_row):
+				selected_rows.erase(focused_row)
+			else:
+				selected_rows.append(focused_row)
+			_anchor_row = focused_row
+			cell_selected.emit(focused_row, focused_col)
+			_finalize_key_operation()
+			return
+		_:
+			return
+
+	var old_row := focused_row
+	focused_row = new_row
+	focused_col = new_col
+
+	_update_selection_after_navigation(old_row, is_shift, is_ctrl_cmd)
+
+	if focused_row != -1:
+		_ensure_row_visible(focused_row)
+		_ensure_col_visible(focused_col)
+
+	if old_row != focused_row or new_col != focused_col:
+		cell_selected.emit(focused_row, focused_col)
+
+	_finalize_key_operation()
+
+
+func _page_row_count() -> int:
+	return maxi(1, floori((size.y - header_height) / row_height) if row_height > 0 else 10)
+
+
+func _update_selection_after_navigation(old_row: int, is_shift: bool, is_ctrl_cmd: bool) -> void:
+	if is_shift:
+		if _anchor_row == -1:
+			_anchor_row = old_row if old_row != -1 else 0
+		if focused_row == -1:
+			return
+		selected_rows.clear()
+		for i in range(mini(_anchor_row, focused_row), maxi(_anchor_row, focused_row) + 1):
+			if i >= 0 and i < _total_rows:
+				selected_rows.append(i)
+		if selected_rows.size() > 1:
+			multiple_rows_selected.emit(selected_rows)
+	elif is_ctrl_cmd:
+		pass # Move focus only, preserve selection
+	else:
+		if focused_row != -1:
+			selected_rows.clear()
+			selected_rows.append(focused_row)
+			_anchor_row = focused_row
+		else:
+			selected_rows.clear()
+			_anchor_row = -1
+
+
+func _finalize_key_operation() -> void:
+	queue_redraw()
+	get_viewport().set_input_as_handled()
+
+
+func _apply_pan_axis(delta: float, scroll: ScrollBar, axis: int) -> void:
+	if not scroll.visible:
+		return
+	if sign(delta) != sign(_pan_delta_accumulation[axis]):
+		_pan_delta_accumulation[axis] = 0.0
+	_pan_delta_accumulation[axis] += delta
+	if abs(_pan_delta_accumulation[axis]) >= 1.0:
+		scroll.value += sign(_pan_delta_accumulation[axis]) * _v_scroll.step #scroll.step
+		_pan_delta_accumulation[axis] -= sign(_pan_delta_accumulation[axis])
 
 #endregion
 
