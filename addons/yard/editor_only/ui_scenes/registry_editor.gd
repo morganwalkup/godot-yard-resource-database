@@ -124,10 +124,14 @@ func open_registry(registry: Registry) -> void:
 		_editor_state_data = _editor_state_data.save_and_reload()
 	_update_registries_itemlist()
 	_editor_state_data.add_recent(registry)
+
+	if RegistryIO.get_registry_settings(registry).auto_rescan:
+		RegistryIO.sync_registry_entries_from_scan_dir(registry)
+
 	select_registry(uid)
 
 
-## Close a registry, ask for save if not saved, and remove it from the list
+## Close a registry, which removes it from the registry list and from memory
 func close_registry(uid: String) -> void:
 	assert(_editor_state_data.opened_registries.has(uid))
 	_editor_state_data.opened_registries.erase(uid)
@@ -172,8 +176,6 @@ func select_registry(uid: String) -> void:
 	if EditorInterface.get_inspector().get_edited_object() != registry:
 		EditorInterface.inspect_object(registry, "", true)
 
-	if RegistryIO.get_registry_settings(registry).auto_rescan:
-		RegistryIO.sync_registry_entries_from_scan_dir(registry)
 	registry_table_view.current_registry = registry
 	_toggle_visibility_topbar_buttons()
 	_toggle_file_menu_items()
