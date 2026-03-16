@@ -493,13 +493,15 @@ func _edit_entry_property(entry: StringName, property: StringName, old_value: Va
 		return
 
 	res.set(property, new_value)
+	var old_is_string := typeof(old_value) in [TYPE_STRING, TYPE_STRING_NAME]
+	var new_is_string := typeof(res.get(property)) in [TYPE_STRING, TYPE_STRING_NAME]
 	print_rich(
 		"[color=%s]Set %s—>%s from %s to %s[/color]" % [
 			LOGGING_INFO_COLOR,
 			current_registry.get_string_id(uid),
 			property,
-			old_value,
-			res.get(property),
+			'"' + old_value + '"' if old_is_string else old_value,
+			'"' + res.get(property) + '"' if new_is_string else res.get(property),
 		],
 	)
 
