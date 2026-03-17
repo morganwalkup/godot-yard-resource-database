@@ -736,23 +736,26 @@ func _draw_header_cell(col_idx: int, cell_x: float, vis_w: float) -> void:
 		font_color = header_filter_active_font_color
 		header_text += " (" + str(_data.size()) + ")"
 
-	var x_margin: int = H_ALIGNMENT_MARGINS.get(column.h_alignment)
+	var header_alignment := HORIZONTAL_ALIGNMENT_LEFT
+	var x_margin: int = H_ALIGNMENT_MARGINS.get(header_alignment)
 	var baseline_y := _get_text_baseline_y(0.0, header_height)
 	draw_string(
 		font,
 		Vector2(cell_x + x_margin, baseline_y),
 		header_text,
-		column.h_alignment,
+		header_alignment,
 		column.current_width - abs(x_margin),
 		font_size,
 		font_color,
 	)
 
 	if col_idx == _last_column_sorted:
-		var text_size := font.get_string_size(header_text, column.h_alignment, column.current_width, font_size)
-		var icon_align := HORIZONTAL_ALIGNMENT_RIGHT \
-		if column.h_alignment in [HORIZONTAL_ALIGNMENT_LEFT, HORIZONTAL_ALIGNMENT_CENTER] \
-		else HORIZONTAL_ALIGNMENT_LEFT
+		var text_size := font.get_string_size(header_text, header_alignment, column.current_width, font_size)
+		var icon_align := (
+			HORIZONTAL_ALIGNMENT_RIGHT
+			if header_alignment in [HORIZONTAL_ALIGNMENT_LEFT, HORIZONTAL_ALIGNMENT_CENTER]
+			else HORIZONTAL_ALIGNMENT_LEFT
+		)
 		draw_string(
 			font,
 			Vector2(cell_x, header_height / 2.0 + text_size.y / 2.0 - (font_size / 2.0 - 1.0)),
