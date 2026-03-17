@@ -562,6 +562,7 @@ func _open_text_editor(row: int, col: int) -> void:
 	_text_editor_line_edit.position = cell_rect.position
 	_text_editor_line_edit.size = cell_rect.size
 	_text_editor_line_edit.text = str(cell_value) if get_cell_value(row, col) != null else ""
+	_text_editor_line_edit.alignment = get_column(col).h_alignment
 	_text_editor_line_edit.show()
 	_text_editor_line_edit.grab_focus()
 	_text_editor_line_edit.select_all()
@@ -1881,6 +1882,8 @@ class ColumnConfig:
 		header = p_header
 		type = p_type
 		h_alignment = p_alignment
+		if self.is_numeric_column():
+			h_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 
 
 	func is_path_column() -> bool:
