@@ -578,6 +578,15 @@ func _warn_unimplemented() -> void:
 	push_warning("This feature is not implemented yet. Demand to see my manager !")
 
 
+func _print_fake_error(message: String) -> void:
+	print_rich(
+		"[color=%s]● [b]ERROR:[/b] %s[/color]" % [
+			EditorThemeUtils.color_error.to_html(false),
+			message,
+		],
+	)
+
+
 func _on_cell_selected(row: int, column: int) -> void:
 	# WARNING: uncommenting it increases the chance of a crash occuring by a lot. Inexplicable,
 	# but supposedly related to switching selected cell with arrow keys. Only report: 'Abort trap: 6'
@@ -670,18 +679,22 @@ func _on_add_entry_button_pressed() -> void:
 
 	var res: Resource = _res_picker.edited_resource
 	var string_id: StringName = StringName(entry_name_line_edit.text)
-	var path := res.resource_path
-	var uid := ResourceUID.path_to_uid(path)
+	var uid := ResourceUID.path_to_uid(res.resource_path)
 
 	var status := RegistryIO.add_entry(current_registry, uid, string_id)
-	if status == OK:
-		_res_picker.edited_resource = null
-		entry_name_line_edit.text = ""
-		_toggle_add_entry_button()
-		update_view()
-	else:
-		print_rich(
-			"[color=%s]● [b]ERROR:[/b] This resource is not saved as a file. Click [b]⌄[/b] then [b]Save[/b] on the resource picker to save it first.[/color]" % [
-				EditorThemeUtils.color_error.to_html(false),
-			],
-		)
+	match status:
+		OK:
+			_res_picker.edited_resource = null
+			entry_name_line_edit.text = ""
+			_toggle_add_entry_button()
+			update_view()
+		ERR_ALREADY_EXISTS:
+			_print_fake_error("An entry with the same UID already exists in the registry.")
+		ERR_CANT_ACQUIRE_RESOURCE:
+			_print_fake_error("This resource is not saved as a file. Click [b]⌄[/b] then [b]Save[/b] on the resource picker to save it first.")
+		ERR_INVALID_PARAMETER:
+			_print_fake_error("The String ID is invalid. It must not start with 'uid://'.")
+		ERR_DATABASE_CANT_WRITE:
+			_print_fake_error("This resource doesn't match the registry class restriction.")
+		_:
+			_print_fake_error("Failed to add entry to the registry.")
