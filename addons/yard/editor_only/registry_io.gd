@@ -39,7 +39,7 @@ static func create_registry_file(path: String, settings: RegistrySettings = null
 static func get_registry_settings(registry: Registry) -> RegistrySettings:
 	var settings := RegistrySettings.new()
 	settings.class_restriction = registry._class_restriction
-	settings.scan_directory = registry._scan_directory
+	settings.scan_directory = _normalize_abs_path(registry._scan_directory)
 	settings.recursive_scan = registry._recursive_scan
 	settings.auto_rescan = registry._scan_auto
 	settings.remove_unmatched = registry._scan_remove
@@ -261,15 +261,15 @@ static func dir_has_matching_resource(registry: Registry, path: String, ignore_s
 	var next: String = dir.get_next()
 
 	while next != "":
-		var next_path: String = dir.get_current_dir().path_join(next)
-		var passes_scan_filters := ignore_scan_filters or _path_passes_scan_filters(next_path, re_include, re_exclude)
+		var abs_next_path: String = dir.get_current_dir().path_join(next)
+		var rel_next_path := abs_next_path.replace(registry._scan_directory + "/", "")
 
-		if recursive and dir.current_is_dir() and passes_scan_filters:
-			if dir_has_matching_resource(registry, next_path, ignore_scan_filters, re_include, re_exclude):
+		if recursive and dir.current_is_dir() and (ignore_scan_filters or _path_passes_scan_filters(rel_next_path, null, re_exclude)):
+			if dir_has_matching_resource(registry, abs_next_path, ignore_scan_filters, re_include, re_exclude):
 				dir.list_dir_end()
 				return true
-		elif ResourceLoader.exists(next_path) and passes_scan_filters:
-			var res := load(next_path)
+		elif ResourceLoader.exists(abs_next_path) and (ignore_scan_filters or _path_passes_scan_filters(rel_next_path, re_include, re_exclude)):
+			var res := load(abs_next_path)
 			if is_resource_matching_restriction(registry, res):
 				dir.list_dir_end()
 				return true
@@ -291,13 +291,14 @@ static func dir_get_matching_resources(registry: Registry, path: String, ignore_
 	var matching_resources: Array[Resource] = []
 
 	while next != "":
-		var next_path: String = dir.get_current_dir().path_join(next)
-		var passes_scan_filters := ignore_scan_filters or _path_passes_scan_filters(next_path, re_include, re_exclude)
+		var abs_next_path: String = dir.get_current_dir().path_join(next)
+		var rel_next_path := abs_next_path.replace(registry._scan_directory + "/", "")
 
-		if recursive and dir.current_is_dir() and passes_scan_filters:
-			matching_resources += dir_get_matching_resources(registry, next_path, ignore_scan_filters, re_include, re_exclude)
-		elif ResourceLoader.exists(next_path) and passes_scan_filters:
-			var res := load(next_path)
+		# Do not match the include pattern against directories, as it's a partial path. Only match on leaf (file) paths.
+		if recursive and dir.current_is_dir() and (ignore_scan_filters or _path_passes_scan_filters(rel_next_path, null, re_exclude)):
+			matching_resources += dir_get_matching_resources(registry, abs_next_path, ignore_scan_filters, re_include, re_exclude)
+		elif ResourceLoader.exists(abs_next_path) and (ignore_scan_filters or _path_passes_scan_filters(rel_next_path, re_include, re_exclude)):
+			var res := load(abs_next_path)
 			if is_resource_matching_restriction(registry, res):
 				matching_resources.append(res)
 
@@ -432,7 +433,7 @@ static func _apply_settings(registry: Registry, settings: RegistrySettings) -> E
 		return ERR_DOES_NOT_EXIST
 
 	registry._class_restriction = settings.class_restriction
-	registry._scan_directory = settings.scan_directory
+	registry._scan_directory = _normalize_abs_path(settings.scan_directory)
 	registry._recursive_scan = settings.recursive_scan
 	registry._scan_auto = settings.auto_rescan
 	registry._scan_remove = settings.remove_unmatched
@@ -492,6 +493,17 @@ static func _resolve_property_path(obj: Object, path: StringName) -> Variant:
 		if current == null:
 			return null
 	return current
+
+
+static func _normalize_abs_path(path: String) -> String:
+	if path.is_empty() or not path.is_absolute_path():
+		return ""
+	var normalized_path := path.simplify_path()
+	if not normalized_path.begins_with("res://"):
+		normalized_path = "res://" + normalized_path
+	if normalized_path.ends_with("/"):
+		normalized_path = normalized_path.substr(0, normalized_path.length() - 1)
+	return normalized_path
 
 
 class RegistrySettings:
