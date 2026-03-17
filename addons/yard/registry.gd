@@ -58,7 +58,9 @@ extends Resource
 ## [/codeblock]
 const PROPERTY_HINT_CUSTOM: int = 1024
 
-@export_storage var _registry_version: int = 0
+const _REGISTRY_FORMAT_VERSION: int = 1
+
+@export_storage var _version: int = 0
 @export_storage var _class_restriction: StringName = &""
 @export_storage var _scan_directory: String = ""
 @export_storage var _recursive_scan: bool = false

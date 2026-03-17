@@ -38,6 +38,7 @@ static func create_registry_file(path: String, settings: RegistrySettings = null
 
 static func get_registry_settings(registry: Registry) -> RegistrySettings:
 	var settings := RegistrySettings.new()
+	settings.version = registry._version
 	settings.class_restriction = registry._class_restriction
 	settings.scan_directory = _normalize_abs_path(registry._scan_directory)
 	settings.recursive_scan = registry._recursive_scan
@@ -432,6 +433,7 @@ static func _apply_settings(registry: Registry, settings: RegistrySettings) -> E
 	if settings.scan_directory and not DirAccess.dir_exists_absolute(settings.scan_directory):
 		return ERR_DOES_NOT_EXIST
 
+	registry._version = settings.version
 	registry._class_restriction = settings.class_restriction
 	registry._scan_directory = _normalize_abs_path(settings.scan_directory)
 	registry._recursive_scan = settings.recursive_scan
@@ -507,6 +509,7 @@ static func _normalize_abs_path(path: String) -> String:
 
 
 class RegistrySettings:
+	var version: int = Registry._REGISTRY_FORMAT_VERSION
 	var class_restriction: StringName = &""
 	var scan_directory: String = ""
 	var recursive_scan: bool = false

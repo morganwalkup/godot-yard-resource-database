@@ -279,7 +279,7 @@ func _add_registry_to_itemlist(uid: String, display_name: String) -> int:
 
 
 func _resolve_registry_itemlist_icon(registry: Registry) -> Texture2D:
-	var restriction := registry._class_restriction
+	var restriction := RegistryIO.get_registry_settings(registry).class_restriction
 	if restriction != "":
 		if RegistryIO.is_quoted_string(restriction):
 			var path := restriction.substr(1, restriction.length() - 2)

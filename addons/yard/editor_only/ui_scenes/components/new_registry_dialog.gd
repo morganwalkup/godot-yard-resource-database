@@ -338,7 +338,7 @@ func _on_confirmed() -> void:
 		RegistryDialogState.REGISTRY_SETTINGS:
 			var new_class_restriction := class_restriction_line_edit.text.strip_edges()
 			if (
-				new_class_restriction != edited_registry._class_restriction
+				new_class_restriction != RegistryIO.get_registry_settings(edited_registry).class_restriction
 				and RegistryIO.would_erase_entries(edited_registry, new_class_restriction)
 			):
 				new_restriction_confirmation_dialog.popup()

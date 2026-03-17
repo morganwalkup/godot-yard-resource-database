@@ -520,7 +520,7 @@ func _setup_add_entry() -> void:
 		_res_picker.queue_free()
 	_res_picker = EditorResourcePicker.new()
 	_res_picker.custom_minimum_size = Vector2(240, 0)
-	var restriction := current_registry._class_restriction
+	var restriction := RegistryIO.get_registry_settings(current_registry).class_restriction
 	if not restriction:
 		_res_picker.base_type = "Resource"
 	elif not RegistryIO.is_quoted_string(restriction):
