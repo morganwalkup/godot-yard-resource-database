@@ -399,7 +399,7 @@ func _build_columns() -> Array[DynamicTable.ColumnConfig]:
 	var columns: Array[DynamicTable.ColumnConfig] = []
 
 	var string_id_column: DynamicTable.ColumnConfig = DynamicTable.ColumnConfig.new.callv(STRINGID_COLUMN_CONFIG)
-	string_id_column.custom_font_color = get_theme_color(&"font_hover_pressed_color", &"Editor")
+	string_id_column.custom_font_color = get_theme_color(&"accent_color", &"Editor")
 	string_id_column.h_alignment = HORIZONTAL_ALIGNMENT_RIGHT
 	columns.append(string_id_column) #0
 
