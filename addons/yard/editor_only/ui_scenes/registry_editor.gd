@@ -75,6 +75,9 @@ var _fuz := FuzzySearch.new()
 
 
 func _ready() -> void:
+	if not Engine.is_editor_hint() or EditorInterface.get_edited_scene_root() == self:
+		return
+
 	EditorInterface.get_resource_filesystem().filesystem_changed.connect(_on_filesystem_changed)
 
 	_file_dialog = EditorFileDialog.new()

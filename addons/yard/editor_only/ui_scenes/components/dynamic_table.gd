@@ -131,7 +131,7 @@ var _v_scroll: VScrollBar
 
 
 func _ready() -> void:
-	if Engine.is_editor_hint():
+	if Engine.is_editor_hint() and not EditorInterface.get_edited_scene_root() == self:
 		EditorInterface.get_editor_settings().settings_changed.connect(_on_editor_settings_changed)
 		EditorInterface.get_resource_previewer().preview_invalidated.connect(_on_resource_previewer_preview_invalidated)
 		set_native_theming()

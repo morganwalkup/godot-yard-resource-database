@@ -89,10 +89,12 @@ var _uid_resource_to_inspect: String
 
 
 func _ready() -> void:
-	if Engine.is_editor_hint():
-		EditorInterface.get_inspector().property_edited.connect(
-			_on_inspector_property_edited,
-		)
+	if not Engine.is_editor_hint() or EditorInterface.get_edited_scene_root() == self:
+		return
+
+	EditorInterface.get_inspector().property_edited.connect(
+		_on_inspector_property_edited,
+	)
 
 	dynamic_table.cell_selected.connect(_on_cell_selected)
 	dynamic_table.cell_right_selected.connect(_on_cell_right_selected)

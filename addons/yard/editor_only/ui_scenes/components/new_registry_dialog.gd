@@ -73,7 +73,7 @@ var _file_dialog_state: FileDialogState
 
 
 func _ready() -> void:
-	if not Engine.is_editor_hint():
+	if not Engine.is_editor_hint() or EditorInterface.get_edited_scene_root() == self:
 		return
 
 	var base_font_color := get_theme_color(&"font_color", &"Editor")
