@@ -53,8 +53,7 @@ const ACCELERATORS_MAC: Dictionary = {
 
 var _editor_state_data: EditorStateData
 var _session_closed_uids: Array[String] = [] # Array[uid]
-var _file_dialog: EditorFileDialog # TODO: refactor as Node in packed scene
-var _file_dialog_option: FileMenuAction = FileMenuAction.NONE
+var _file_dialog: EditorFileDialog
 var _current_registry_uid: String = ""
 var _fuz := FuzzySearch.new()
 
@@ -80,6 +79,14 @@ func _ready() -> void:
 
 	_file_dialog = EditorFileDialog.new()
 	_file_dialog.access = EditorFileDialog.ACCESS_RESOURCES
+	_file_dialog.file_mode = EditorFileDialog.FILE_MODE_OPEN_FILE
+	_file_dialog.title = tr("Open Registry")
+	var filter := ", ".join(
+		RegistryIO.REGISTRY_FILE_EXTENSIONS.map(
+			func(e: String) -> String: return "*.%s" % e
+		),
+	)
+	_file_dialog.add_filter(filter, "Registries")
 	_file_dialog.file_selected.connect(_on_file_dialog_action)
 	add_child(_file_dialog)
 
@@ -222,48 +229,39 @@ func _get_registry_list_index(uid: String) -> int:
 	return -1
 
 
-## Update the ItemList of opened registries, based on the filter and avoid
-## duplicates (mimicks the Script list behavior, showing path elements if needed)
+## Update the ItemList of opened registries based on the filter,
+## disambiguating duplicate names by prepending parent folders (mimicking the Script list).
 func _update_registries_itemlist() -> void:
 	registries_itemlist.set_block_signals(true)
 	registries_itemlist.clear()
 
-	if _editor_state_data.opened_registries.is_empty():
-		registries_itemlist.set_block_signals(false)
-		return
-
-	_editor_state_data = _editor_state_data.save_and_reload()
-	var all_uids: Array[String] = _editor_state_data.opened_registries.keys()
-
-	# Determine which uids to show using fuzzy search, based on LineEdit filter.
-	var display_name_by_uid := _build_registry_display_names(all_uids)
-	var filter_text := registries_filter.text.strip_edges()
-	var uids_to_show: Array[String] = []
-	if filter_text == "":
-		uids_to_show = all_uids
-	else:
-		_fuz.set_query(filter_text)
-		var targets := PackedStringArray()
-		for uid in all_uids:
-			# Fuzzy match on displayed names, mimicking the Godot Editor script list.
-			# To match on full resource paths, replace by the following :
-			# `targets.append(_editor_state_data.opened_registries[uid].resource_path)`
-			targets.append(display_name_by_uid[uid])
-		var fuzzy_results: Array[FuzzySearchResult] = []
-		_fuz.search_all(targets, fuzzy_results) # sorted by score already
-		for res: FuzzySearchResult in fuzzy_results:
-			# res.original_index maps back to `targets` (thus to `all_uids`)
-			var idx: int = int(res.original_index)
-			if idx >= 0 and idx < all_uids.size():
-				uids_to_show.append(all_uids[idx])
-
-	for uid in uids_to_show:
-		_add_registry_to_itemlist(uid, display_name_by_uid[uid])
-
-	if _current_registry_uid:
-		_restore_selection(_current_registry_uid)
+	if not _editor_state_data.opened_registries.is_empty():
+		_editor_state_data = _editor_state_data.save_and_reload()
+		var all_uids: Array[String] = _editor_state_data.opened_registries.keys()
+		var display_name_by_uid := _build_registry_display_names(all_uids)
+		for uid in _get_uids_to_show(all_uids, display_name_by_uid):
+			_add_registry_to_itemlist(uid, display_name_by_uid[uid])
+		if _current_registry_uid:
+			_restore_selection(_current_registry_uid)
 
 	registries_itemlist.set_block_signals(false)
+
+
+# Fuzzy match on display names (mimicking the Godot script list).
+# To match on full paths instead: replace display_name_by_uid[uid] with the resource_path.
+func _get_uids_to_show(all_uids: Array[String], display_name_by_uid: Dictionary) -> Array[String]:
+	var filter_text := registries_filter.text.strip_edges()
+	if filter_text.is_empty():
+		return all_uids
+
+	_fuz.set_query(filter_text)
+	var targets := PackedStringArray(all_uids.map(func(uid: String) -> String: return display_name_by_uid[uid]))
+	var fuzzy_results: Array[FuzzySearchResult] = []
+	_fuz.search_all(targets, fuzzy_results)
+	var result: Array[String] = []
+	for r: FuzzySearchResult in fuzzy_results:
+		result.append(all_uids[r.original_index])
+	return result
 
 
 func _add_registry_to_itemlist(uid: String, display_name: String) -> int:
@@ -312,75 +310,43 @@ func _toggle_visibility_topbar_buttons() -> void:
 	refresh_view_button.visible = false #has_registry # TODO: add project setting for showing it based on user preference
 	reindex_button.visible = has_registry
 	reindex_button.disabled = not has_registry or registry_table_view.current_registry.get_indexed_properties().is_empty()
-	var show_rescan := has_registry and not RegistryIO.get_registry_settings(registry_table_view.current_registry).auto_rescan
-	rescan_button.visible = show_rescan
-	rescan_button.disabled = not show_rescan
+	rescan_button.visible = has_registry and not RegistryIO.get_registry_settings(registry_table_view.current_registry).auto_rescan
 
 
-## Returns: uid -> display name in list.
-## Show basename; if duplicates, prepend parent folders until unique within that duplicate set.
+## Returns uid -> display name, showing basename and prepending parent folders to disambiguate duplicates.
 func _build_registry_display_names(uids: Array[String]) -> Dictionary:
-	var parts_by_uid: Dictionary = { } # uid -> Array[String] (path components, without "res://")
+	var parts_by_uid: Dictionary = { }
 	var groups: Dictionary = { } # basename -> Array[String] of uids
-	var result: Dictionary = { } # uid -> display name
+	var result: Dictionary = { }
 
-	# 1) Collect path parts and group by basename
 	for uid in uids:
-		var path := _editor_state_data.opened_registries[uid].resource_path
-		var rel := path
-		if rel.begins_with("res://"):
-			rel = rel.substr(6)
-
-		var parts := rel.split("/", false)
+		var path: String = _editor_state_data.opened_registries[uid].resource_path
+		var parts := path.trim_prefix("res://").split("/", false)
 		parts_by_uid[uid] = parts
+		groups.get_or_add(parts[-1], []).append(uid)
 
-		var base := parts[parts.size() - 1] if parts.size() > 0 else rel
-		if not groups.has(base):
-			groups[base] = []
-		groups[base].append(uid)
-
-	# 2) Disambiguate only the duplicate basenames (keep unique ones as plain filename)
-	for base: String in groups.keys():
+	for base: String in groups:
 		var group: Array = groups[base]
-
 		if group.size() == 1:
 			result[group[0]] = base
 			continue
 
-		# Compute how deep we might need to go for this group.
-		var max_depth := 0
-		for uid: String in group:
-			var parts: Array = parts_by_uid[uid]
-			max_depth = max(max_depth, parts.size())
-
-		# Increase suffix depth until names are unique within the group.
-		var level := 1 # 1 parent folder + filename
-		while true:
+		var max_depth: int = group.map(func(uid: String) -> int: return parts_by_uid[uid].size()).max()
+		var found_unique := false
+		for level in range(1, max_depth):
 			var seen: Dictionary = { }
-			var all_unique := true
-
 			for uid: String in group:
 				var parts: Array = parts_by_uid[uid]
-				var take: int = min(parts.size(), 1 + level)
-				var start := parts.size() - take
-				var label := "/".join(parts.slice(start, parts.size()))
+				var label := "/".join(parts.slice(parts.size() - min(parts.size(), 1 + level)))
 				result[uid] = label
-
-				if seen.has(label):
-					all_unique = false
-				else:
-					seen[label] = true
-
-			if all_unique:
+				seen[label] = seen.get(label, 0) + 1
+			if seen.values().max() == 1:
+				found_unique = true
 				break
 
-			level += 1
-			if 1 + level >= max_depth:
-				# Fallback: full relative path (still the best you can do if identical)
-				for uid: String in group:
-					var parts: Array = parts_by_uid[uid]
-					result[uid] = "/".join(parts)
-				break
+		if not found_unique:
+			for uid: String in group:
+				result[uid] = "/".join(parts_by_uid[uid])
 
 	return result
 
@@ -463,13 +429,6 @@ func _do_file_menu_action(action_id: int) -> void:
 				new_registry_dialog.RegistryDialogState.NEW_REGISTRY,
 			)
 		FileMenuAction.OPEN:
-			_file_dialog_option = FileMenuAction.OPEN
-			_file_dialog.file_mode = EditorFileDialog.FILE_MODE_OPEN_FILE
-			_file_dialog.title = tr("Open Registry")
-			var filter := ""
-			for ext: String in RegistryIO.REGISTRY_FILE_EXTENSIONS:
-				filter += "%s*.%s" % ["" if filter == "" else ", ", ext]
-			_file_dialog.add_filter(filter, "Registries")
 			_file_dialog.popup_file_dialog()
 		FileMenuAction.REOPEN_CLOSED:
 			if _session_closed_uids.is_empty(): # check because of shortcut
@@ -513,23 +472,14 @@ func _do_file_menu_action(action_id: int) -> void:
 
 
 func _reorder_opened_registries_move(uid: String, delta: int) -> bool:
-	# delta = -1 -> move one up,
-	# delta = +1 -> move one down
-	if not _editor_state_data.opened_registries.has(uid):
-		return false
-
 	var keys: Array[String] = _editor_state_data.opened_registries.keys()
 	var i := keys.find(uid)
-	if i == -1:
+	var j := i + delta
+	if i == -1 or j < 0 or j >= keys.size():
 		return false
 
-	var j := i + delta
-	if j < 0 or j >= keys.size():
-		return false # can't move
-
-	var tmp := keys[i]
 	keys[i] = keys[j]
-	keys[j] = tmp
+	keys[j] = uid
 
 	var reordered: Dictionary[String, Registry] = { }
 	for k in keys:
@@ -580,8 +530,12 @@ func _show_in_filesystem(uid: String) -> void:
 	fs.navigate_to_path(path)
 
 
-func _warn_unimplemented() -> void:
-	push_warning("This feature is not implemented yet. Demand to see my manager !")
+func _add_column_check_item(popup: PopupMenu, prop: Dictionary) -> void:
+	var prop_name: String = prop[&"name"]
+	popup.add_check_item(prop_name.capitalize())
+	popup.set_item_tooltip(popup.item_count - 1, prop_name)
+	popup.set_item_icon(popup.item_count - 1, AnyIcon.get_property_icon_from_dict(prop))
+	popup.set_item_checked(popup.item_count - 1, prop_name not in registry_table_view.current_cache_data.disabled_columns)
 
 
 func _on_registries_filter_text_changed(_new_text: String) -> void:
@@ -656,17 +610,13 @@ func _on_itemlist_registries_dropped(registries: Array[Registry]) -> void:
 
 
 func _on_file_dialog_action(path: String) -> void:
-	match _file_dialog_option:
-		FileMenuAction.NEW:
-			_warn_unimplemented()
-		FileMenuAction.OPEN:
-			var res := load(path)
-			if res is Registry:
-				open_registry(res)
-			elif res.get_script():
-				push_error("Tried to open %s as a Registry" % res.get_script().get_global_name())
-			else:
-				push_error("Tried to open %s as a Registry" % res.get_class())
+	var res := load(path)
+	if res is Registry:
+		open_registry(res)
+	elif res.get_script():
+		push_error("Tried to open %s as a Registry" % res.get_script().get_global_name())
+	else:
+		push_error("Tried to open %s as a Registry" % res.get_class())
 
 
 func _on_refresh_view_button_pressed() -> void:
@@ -703,7 +653,6 @@ func _on_make_floating_button_pressed() -> void:
 		"https://github.com/godotengine/godot/pull/113051",
 		"[/url][/color]",
 	)
-	#_warn_unimplemented()
 
 
 func _on_columns_menu_button_about_to_popup() -> void:
@@ -719,24 +668,14 @@ func _on_columns_menu_button_about_to_popup() -> void:
 	popup.set_item_checked(0, registry_table_view.id_columns_frozen)
 
 	popup.add_separator()
-
-	for prop: Dictionary in registry_table_view.properties_column_info:
-		var prop_name: String = prop[&"name"]
-		if prop_name not in DISABLED_BY_DEFAULT_COLUMNS:
-			popup.add_check_item(prop_name.capitalize())
-			popup.set_item_tooltip(popup.item_count - 1, prop_name)
-			popup.set_item_icon(popup.item_count - 1, AnyIcon.get_property_icon_from_dict(prop))
-			popup.set_item_checked(popup.item_count - 1, prop_name not in registry_table_view.current_cache_data.disabled_columns)
+	for prop in registry_table_view.properties_column_info:
+		if prop[&"name"] not in DISABLED_BY_DEFAULT_COLUMNS:
+			_add_column_check_item(popup, prop)
 
 	popup.add_separator()
-
-	for prop: Dictionary in registry_table_view.properties_column_info:
-		var prop_name: String = prop[&"name"]
-		if prop_name in DISABLED_BY_DEFAULT_COLUMNS:
-			popup.add_check_item(prop_name.capitalize())
-			popup.set_item_tooltip(popup.item_count - 1, prop_name)
-			popup.set_item_icon(popup.item_count - 1, AnyIcon.get_property_icon_from_dict(prop))
-			popup.set_item_checked(popup.item_count - 1, prop_name not in registry_table_view.current_cache_data.disabled_columns)
+	for prop in registry_table_view.properties_column_info:
+		if prop[&"name"] in DISABLED_BY_DEFAULT_COLUMNS:
+			_add_column_check_item(popup, prop)
 
 
 func _on_registry_settings_button_pressed() -> void:

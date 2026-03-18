@@ -574,10 +574,6 @@ func _unselect() -> void:
 	dynamic_table.queue_redraw()
 
 
-func _warn_unimplemented() -> void:
-	push_warning("This feature is not implemented yet. Demand to see my manager !")
-
-
 func _print_fake_error(message: String) -> void:
 	print_rich(
 		"[color=%s]● [b]ERROR:[/b] %s[/color]" % [
