@@ -293,7 +293,9 @@ static func dir_get_matching_resources(registry: Registry, path: String, ignore_
 
 	while next != "":
 		var abs_next_path: String = dir.get_current_dir().path_join(next)
-		var rel_next_path := abs_next_path.replace(registry._scan_directory + "/", "")
+		var rel_next_path := abs_next_path.replace(registry._scan_directory, "")
+		if rel_next_path.begins_with("/"):
+			rel_next_path = rel_next_path.substr(1)
 
 		# Do not match the include pattern against directories, as it's a partial path. Only match on leaf (file) paths.
 		if recursive and dir.current_is_dir() and (ignore_scan_filters or _path_passes_scan_filters(rel_next_path, null, re_exclude)):
@@ -503,7 +505,7 @@ static func _normalize_abs_path(path: String) -> String:
 	var normalized_path := path.simplify_path()
 	if not normalized_path.begins_with("res://"):
 		normalized_path = "res://" + normalized_path
-	if normalized_path.ends_with("/"):
+	if not normalized_path == "res://" and normalized_path.ends_with("/"):
 		normalized_path = normalized_path.substr(0, normalized_path.length() - 1)
 	return normalized_path
 
