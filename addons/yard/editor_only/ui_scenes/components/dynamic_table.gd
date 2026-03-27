@@ -243,12 +243,17 @@ func set_native_theming(delay: int = 0) -> void:
 		await get_tree().create_timer(delay).timeout
 
 	var root := EditorInterface.get_base_control()
+	var editor_settings := EditorInterface.get_editor_settings()
 	font = root.get_theme_font(&"main", &"EditorFonts")
 	default_font_color = root.get_theme_color(&"font_color", &"Editor")
 	font_size = root.get_theme_font_size(&"main_size", &"EditorFonts")
-	header_color = root.get_theme_color(&"dark_color_1", &"Editor")
 	row_color = root.get_theme_color(&"base_color", &"Editor")
-	alternate_row_color = root.get_theme_color(&"dark_color_3", &"Editor")
+	if ClassUtils.is_engine_version_equal_or_newer(4, 6) and editor_settings.get_setting("interface/theme/style") == "Modern":
+		alternate_row_color = root.get_theme_color(&"dark_color_3", &"Editor")
+		header_color = root.get_theme_color(&"dark_color_1", &"Editor")
+	else:
+		alternate_row_color = root.get_theme_color(&"dark_color_1", &"Editor")
+		header_color = root.get_theme_color(&"dark_color_2", &"Editor")
 	selected_row_back_color = Color(1, 1, 1, 0.20)
 	selected_cell_back_color = root.get_theme_color(&"accent_color", &"Editor")
 	header_filter_active_font_color = root.get_theme_color(&"accent_color", &"Editor")
