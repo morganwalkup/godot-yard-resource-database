@@ -31,12 +31,6 @@ msgid "Copy UID"
 msgstr "复制 UID"
 
 #: addons/yard/editor_only/ui_scenes/registry_table_view.tscn
-#: addons/yard/editor_only/ui_scenes/components/new_registry_dialog.gd
-#: addons/yard/editor_only/ui_scenes/registry_editor.tscn
-msgid "Show in FileSystem"
-msgstr "在文件系统中显示"
-
-#: addons/yard/editor_only/ui_scenes/registry_table_view.tscn
 #: addons/yard/editor_only/ui_scenes/registry_editor.tscn
 msgid "Edit Resource"
 msgstr "编辑资源"
@@ -58,11 +52,6 @@ msgstr "粘贴到单元格"
 
 #: addons/yard/editor_only/ui_scenes/registry_table_view.tscn
 #: addons/yard/editor_only/ui_scenes/registry_editor.tscn
-msgid "Select All"
-msgstr "全选"
-
-#: addons/yard/editor_only/ui_scenes/registry_table_view.tscn
-#: addons/yard/editor_only/ui_scenes/registry_editor.tscn
 msgid "Invert Selection"
 msgstr "反选"
 
@@ -70,14 +59,6 @@ msgstr "反选"
 #: addons/yard/editor_only/ui_scenes/registry_editor.tscn
 msgid "Unselect"
 msgstr "取消选择"
-
-#: addons/yard/editor_only/ui_scenes/registry_table_view.tscn
-msgid "Please Confirm"
-msgstr "确认"
-
-#: addons/yard/editor_only/ui_scenes/registry_table_view.tscn
-msgid "Yes"
-msgstr "是"
 
 #: addons/yard/editor_only/ui_scenes/registry_table_view.tscn
 msgid "Drop resource files here to add them to the registry."
@@ -173,11 +154,11 @@ msgstr "检测到空属性名。请删除多余的逗号。"
 
 #: addons/yard/editor_only/ui_scenes/components/new_registry_dialog.gd
 msgid "Property '{prop}' is declared on multiple classes with different types."
-msgstr "属性"{prop}"在多个类中以不同类型声明。"
+msgstr "属性\"{prop}\"在多个类中以不同类型声明。"
 
 #: addons/yard/editor_only/ui_scenes/components/new_registry_dialog.gd
 msgid "Property '{prop}' may not exist on class {class_n}."
-msgstr "属性"{prop}"可能不存在于类 {class_n} 中。"
+msgstr "属性\"{prop}\"可能不存在于类 {class_n} 中。"
 
 #: addons/yard/editor_only/ui_scenes/components/new_registry_dialog.gd
 msgid "Will create a new registry file."
@@ -228,14 +209,6 @@ msgid "Create Registry"
 msgstr "创建注册表"
 
 #: addons/yard/editor_only/ui_scenes/components/new_registry_dialog.tscn
-msgid "Create"
-msgstr "创建"
-
-#: addons/yard/editor_only/ui_scenes/components/new_registry_dialog.tscn
-msgid "Remove"
-msgstr "移除"
-
-#: addons/yard/editor_only/ui_scenes/components/new_registry_dialog.tscn
 msgid ""
 "Some of the entries in the registry do not match the\n"
 "new class restriction and would be removed.\n"
@@ -266,11 +239,6 @@ msgid "Auto Rescan:"
 msgstr "自动重新扫描："
 
 #: addons/yard/editor_only/ui_scenes/components/new_registry_dialog.tscn
-#: addons/yard/editor_only/ui_scenes/components/scan_ruleset_editor/scan_ruleset_editor.tscn
-msgid "On"
-msgstr "启用"
-
-#: addons/yard/editor_only/ui_scenes/components/new_registry_dialog.tscn
 msgid ""
 "Remove entries whose file no longer exists in the scan directory, or no "
 "longer matches any scan ruleset."
@@ -283,14 +251,6 @@ msgstr "移除未列出项："
 #: addons/yard/editor_only/ui_scenes/components/new_registry_dialog.tscn
 msgid "Path to the registry file."
 msgstr "注册表文件路径。"
-
-#: addons/yard/editor_only/ui_scenes/components/new_registry_dialog.tscn
-msgid "Path:"
-msgstr "路径："
-
-#: addons/yard/editor_only/ui_scenes/components/new_registry_dialog.tscn
-msgid "Advanced Settings"
-msgstr "高级设置"
 
 #: addons/yard/editor_only/ui_scenes/registry_editor.gd
 msgid "Open Registry"
@@ -313,24 +273,12 @@ msgid "Freeze ID Columns"
 msgstr "固定 ID 列"
 
 #: addons/yard/editor_only/ui_scenes/registry_editor.tscn
-msgid "File"
-msgstr "文件"
-
-#: addons/yard/editor_only/ui_scenes/registry_editor.tscn
 msgid "New Registry..."
 msgstr "新建注册表…"
 
 #: addons/yard/editor_only/ui_scenes/registry_editor.tscn
-msgid "Open..."
-msgstr "打开…"
-
-#: addons/yard/editor_only/ui_scenes/registry_editor.tscn
 msgid "Reopen Closed Registry"
 msgstr "重新打开已关闭的注册表"
-
-#: addons/yard/editor_only/ui_scenes/registry_editor.tscn
-msgid "Open Recent"
-msgstr "最近使用"
 
 #: addons/yard/editor_only/ui_scenes/registry_editor.tscn
 msgid "Copy Registry Path"
@@ -339,26 +287,6 @@ msgstr "复制注册表路径"
 #: addons/yard/editor_only/ui_scenes/registry_editor.tscn
 msgid "Copy Registry UID"
 msgstr "复制注册表 UID"
-
-#: addons/yard/editor_only/ui_scenes/registry_editor.tscn
-msgid "Close"
-msgstr "关闭"
-
-#: addons/yard/editor_only/ui_scenes/registry_editor.tscn
-msgid "Close All"
-msgstr "全部关闭"
-
-#: addons/yard/editor_only/ui_scenes/registry_editor.tscn
-msgid "Close Other Tabs"
-msgstr "关闭其他标签页"
-
-#: addons/yard/editor_only/ui_scenes/registry_editor.tscn
-msgid "Close Tabs Below"
-msgstr "关闭下方标签页"
-
-#: addons/yard/editor_only/ui_scenes/registry_editor.tscn
-msgid "Edit"
-msgstr "编辑"
 
 #: addons/yard/editor_only/ui_scenes/registry_editor.tscn
 msgid "Edit Registry Settings"
@@ -427,18 +355,6 @@ msgstr "将注册表编辑器设为浮动窗口。"
 #: addons/yard/editor_only/ui_scenes/registry_editor.tscn
 msgid "Filter Registries"
 msgstr "筛选注册表"
-
-#: addons/yard/editor_only/ui_scenes/registry_editor.tscn
-msgid "Move Up"
-msgstr "上移"
-
-#: addons/yard/editor_only/ui_scenes/registry_editor.tscn
-msgid "Move Down"
-msgstr "下移"
-
-#: addons/yard/editor_only/ui_scenes/registry_editor.tscn
-msgid "Sort"
-msgstr "排序"
 
 #: addons/yard/plugin.gd
 msgid "Registry"

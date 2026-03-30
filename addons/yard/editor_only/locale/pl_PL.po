@@ -31,12 +31,6 @@ msgid "Copy UID"
 msgstr "Kopiuj UID"
 
 #: addons/yard/editor_only/ui_scenes/registry_table_view.tscn
-#: addons/yard/editor_only/ui_scenes/components/new_registry_dialog.gd
-#: addons/yard/editor_only/ui_scenes/registry_editor.tscn
-msgid "Show in FileSystem"
-msgstr "Pokaż w systemie plików"
-
-#: addons/yard/editor_only/ui_scenes/registry_table_view.tscn
 #: addons/yard/editor_only/ui_scenes/registry_editor.tscn
 msgid "Edit Resource"
 msgstr "Edytuj zasób"
@@ -58,11 +52,6 @@ msgstr "Wklej do komórki"
 
 #: addons/yard/editor_only/ui_scenes/registry_table_view.tscn
 #: addons/yard/editor_only/ui_scenes/registry_editor.tscn
-msgid "Select All"
-msgstr "Zaznacz wszystko"
-
-#: addons/yard/editor_only/ui_scenes/registry_table_view.tscn
-#: addons/yard/editor_only/ui_scenes/registry_editor.tscn
 msgid "Invert Selection"
 msgstr "Odwróć zaznaczenie"
 
@@ -70,14 +59,6 @@ msgstr "Odwróć zaznaczenie"
 #: addons/yard/editor_only/ui_scenes/registry_editor.tscn
 msgid "Unselect"
 msgstr "Odznacz"
-
-#: addons/yard/editor_only/ui_scenes/registry_table_view.tscn
-msgid "Please Confirm"
-msgstr "Potwierdź"
-
-#: addons/yard/editor_only/ui_scenes/registry_table_view.tscn
-msgid "Yes"
-msgstr "Tak"
 
 #: addons/yard/editor_only/ui_scenes/registry_table_view.tscn
 msgid "Drop resource files here to add them to the registry."
@@ -128,12 +109,16 @@ msgstr "Brak katalogu, automatyczne wykrywanie jest wyłączone."
 msgid ""
 "File extension restrictions are optional. Separate multiple extensions with "
 "commas."
-msgstr "Ograniczenia rozszerzeń plików są opcjonalne. Wiele rozszerzeń oddziel przecinkami."
+msgstr ""
+"Ograniczenia rozszerzeń plików są opcjonalne. Wiele rozszerzeń oddziel "
+"przecinkami."
 
 #: addons/yard/editor_only/ui_scenes/components/new_registry_dialog.gd
 msgid ""
 "File extension filter active. Scan will be limited to matching extensions."
-msgstr "Filtr rozszerzeń aktywny. Skanowanie będzie ograniczone do pasujących rozszerzeń."
+msgstr ""
+"Filtr rozszerzeń aktywny. Skanowanie będzie ograniczone do pasujących "
+"rozszerzeń."
 
 #: addons/yard/editor_only/ui_scenes/components/new_registry_dialog.gd
 msgid "Empty file extension detected. Remove extra commas."
@@ -175,7 +160,8 @@ msgstr "Wykryto pustą nazwę właściwości. Usuń zbędne przecinki."
 
 #: addons/yard/editor_only/ui_scenes/components/new_registry_dialog.gd
 msgid "Property '{prop}' is declared on multiple classes with different types."
-msgstr "Właściwość '{prop}' jest zadeklarowana w wielu klasach z różnymi typami."
+msgstr ""
+"Właściwość '{prop}' jest zadeklarowana w wielu klasach z różnymi typami."
 
 #: addons/yard/editor_only/ui_scenes/components/new_registry_dialog.gd
 msgid "Property '{prop}' may not exist on class {class_n}."
@@ -230,14 +216,6 @@ msgid "Create Registry"
 msgstr "Utwórz rejestr"
 
 #: addons/yard/editor_only/ui_scenes/components/new_registry_dialog.tscn
-msgid "Create"
-msgstr "Utwórz"
-
-#: addons/yard/editor_only/ui_scenes/components/new_registry_dialog.tscn
-msgid "Remove"
-msgstr "Usuń"
-
-#: addons/yard/editor_only/ui_scenes/components/new_registry_dialog.tscn
 msgid ""
 "Some of the entries in the registry do not match the\n"
 "new class restriction and would be removed.\n"
@@ -253,7 +231,9 @@ msgstr ""
 msgid ""
 "Properties baked into the registry index for zero-cost runtime queries. "
 "Separate with commas."
-msgstr "Właściwości wbudowane w indeks rejestru do zapytań bez kosztu. Oddziel przecinkami."
+msgstr ""
+"Właściwości wbudowane w indeks rejestru do zapytań bez kosztu. Oddziel "
+"przecinkami."
 
 #: addons/yard/editor_only/ui_scenes/components/new_registry_dialog.tscn
 msgid "Indexed Properties:"
@@ -268,15 +248,12 @@ msgid "Auto Rescan:"
 msgstr "Automatyczne skanowanie:"
 
 #: addons/yard/editor_only/ui_scenes/components/new_registry_dialog.tscn
-#: addons/yard/editor_only/ui_scenes/components/scan_ruleset_editor/scan_ruleset_editor.tscn
-msgid "On"
-msgstr "Włącz"
-
-#: addons/yard/editor_only/ui_scenes/components/new_registry_dialog.tscn
 msgid ""
 "Remove entries whose file no longer exists in the scan directory, or no "
 "longer matches any scan ruleset."
-msgstr "Usuń wpisy, których plik nie istnieje już w katalogu lub nie pasuje do żadnej reguły."
+msgstr ""
+"Usuń wpisy, których plik nie istnieje już w katalogu lub nie pasuje do "
+"żadnej reguły."
 
 #: addons/yard/editor_only/ui_scenes/components/new_registry_dialog.tscn
 msgid "Remove Unlisted:"
@@ -285,14 +262,6 @@ msgstr "Usuń nieobecne:"
 #: addons/yard/editor_only/ui_scenes/components/new_registry_dialog.tscn
 msgid "Path to the registry file."
 msgstr "Ścieżka do pliku rejestru."
-
-#: addons/yard/editor_only/ui_scenes/components/new_registry_dialog.tscn
-msgid "Path:"
-msgstr "Ścieżka:"
-
-#: addons/yard/editor_only/ui_scenes/components/new_registry_dialog.tscn
-msgid "Advanced Settings"
-msgstr "Ustawienia zaawansowane"
 
 #: addons/yard/editor_only/ui_scenes/registry_editor.gd
 msgid "Open Registry"
@@ -315,24 +284,12 @@ msgid "Freeze ID Columns"
 msgstr "Zablokuj kolumny ID"
 
 #: addons/yard/editor_only/ui_scenes/registry_editor.tscn
-msgid "File"
-msgstr "Plik"
-
-#: addons/yard/editor_only/ui_scenes/registry_editor.tscn
 msgid "New Registry..."
 msgstr "Nowy rejestr…"
 
 #: addons/yard/editor_only/ui_scenes/registry_editor.tscn
-msgid "Open..."
-msgstr "Otwórz…"
-
-#: addons/yard/editor_only/ui_scenes/registry_editor.tscn
 msgid "Reopen Closed Registry"
 msgstr "Ponownie otwórz zamknięty rejestr"
-
-#: addons/yard/editor_only/ui_scenes/registry_editor.tscn
-msgid "Open Recent"
-msgstr "Ostatnie rejestry"
 
 #: addons/yard/editor_only/ui_scenes/registry_editor.tscn
 msgid "Copy Registry Path"
@@ -341,26 +298,6 @@ msgstr "Kopiuj ścieżkę rejestru"
 #: addons/yard/editor_only/ui_scenes/registry_editor.tscn
 msgid "Copy Registry UID"
 msgstr "Kopiuj UID rejestru"
-
-#: addons/yard/editor_only/ui_scenes/registry_editor.tscn
-msgid "Close"
-msgstr "Zamknij"
-
-#: addons/yard/editor_only/ui_scenes/registry_editor.tscn
-msgid "Close All"
-msgstr "Zamknij wszystko"
-
-#: addons/yard/editor_only/ui_scenes/registry_editor.tscn
-msgid "Close Other Tabs"
-msgstr "Zamknij inne karty"
-
-#: addons/yard/editor_only/ui_scenes/registry_editor.tscn
-msgid "Close Tabs Below"
-msgstr "Zamknij karty poniżej"
-
-#: addons/yard/editor_only/ui_scenes/registry_editor.tscn
-msgid "Edit"
-msgstr "Edycja"
 
 #: addons/yard/editor_only/ui_scenes/registry_editor.tscn
 msgid "Edit Registry Settings"
@@ -430,18 +367,6 @@ msgstr "Ustaw edytor rejestru jako pływające okno."
 msgid "Filter Registries"
 msgstr "Filtruj rejestry"
 
-#: addons/yard/editor_only/ui_scenes/registry_editor.tscn
-msgid "Move Up"
-msgstr "Przenieś w górę"
-
-#: addons/yard/editor_only/ui_scenes/registry_editor.tscn
-msgid "Move Down"
-msgstr "Przenieś w dół"
-
-#: addons/yard/editor_only/ui_scenes/registry_editor.tscn
-msgid "Sort"
-msgstr "Sortuj"
-
 #: addons/yard/plugin.gd
 msgid "Registry"
 msgstr "Rejestr"
@@ -486,7 +411,9 @@ msgstr "np. `.tres, .res`"
 msgid ""
 "Only paths matching this pattern will be scanned. Applied to the relative "
 "path from the scan directory."
-msgstr "Skanowane będą tylko ścieżki pasujące do tego wzorca. Stosowane do ścieżki względnej od katalogu skanowania."
+msgstr ""
+"Skanowane będą tylko ścieżki pasujące do tego wzorca. Stosowane do ścieżki "
+"względnej od katalogu skanowania."
 
 #: addons/yard/editor_only/ui_scenes/components/scan_ruleset_editor/scan_ruleset_editor.tscn
 msgid "RegEx Include:"
@@ -500,7 +427,9 @@ msgstr "np. `\\.tres$|\\.res$`"
 msgid ""
 "Paths matching this pattern will be skipped. Applied to the relative path "
 "from the scan directory."
-msgstr "Ścieżki pasujące do tego wzorca zostaną pominięte. Stosowane do ścieżki względnej od katalogu skanowania."
+msgstr ""
+"Ścieżki pasujące do tego wzorca zostaną pominięte. Stosowane do ścieżki "
+"względnej od katalogu skanowania."
 
 #: addons/yard/editor_only/ui_scenes/components/scan_ruleset_editor/scan_ruleset_editor.tscn
 msgid "RegEx Exclude:"

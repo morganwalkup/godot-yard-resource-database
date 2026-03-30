@@ -24,11 +24,6 @@ msgstr ""
 msgid "Delete Entry"
 msgstr ""
 
-#: addons/yard/editor_only/ui_scenes/registry_table_view.gd
-#: addons/yard/editor_only/ui_scenes/components/new_registry_dialog.gd
-msgid ""
-msgstr ""
-
 #: addons/yard/editor_only/ui_scenes/registry_table_view.tscn
 #: addons/yard/editor_only/ui_scenes/registry_editor.tscn
 msgid "Copy String ID"
@@ -37,12 +32,6 @@ msgstr ""
 #: addons/yard/editor_only/ui_scenes/registry_table_view.tscn
 #: addons/yard/editor_only/ui_scenes/registry_editor.tscn
 msgid "Copy UID"
-msgstr ""
-
-#: addons/yard/editor_only/ui_scenes/registry_table_view.tscn
-#: addons/yard/editor_only/ui_scenes/components/new_registry_dialog.gd
-#: addons/yard/editor_only/ui_scenes/registry_editor.tscn
-msgid "Show in FileSystem"
 msgstr ""
 
 #: addons/yard/editor_only/ui_scenes/registry_table_view.tscn
@@ -67,25 +56,11 @@ msgstr ""
 
 #: addons/yard/editor_only/ui_scenes/registry_table_view.tscn
 #: addons/yard/editor_only/ui_scenes/registry_editor.tscn
-msgid "Select All"
-msgstr ""
-
-#: addons/yard/editor_only/ui_scenes/registry_table_view.tscn
-#: addons/yard/editor_only/ui_scenes/registry_editor.tscn
 msgid "Invert Selection"
 msgstr ""
-
 #: addons/yard/editor_only/ui_scenes/registry_table_view.tscn
 #: addons/yard/editor_only/ui_scenes/registry_editor.tscn
 msgid "Unselect"
-msgstr ""
-
-#: addons/yard/editor_only/ui_scenes/registry_table_view.tscn
-msgid "Please Confirm"
-msgstr ""
-
-#: addons/yard/editor_only/ui_scenes/registry_table_view.tscn
-msgid "Yes"
 msgstr ""
 
 #: addons/yard/editor_only/ui_scenes/registry_table_view.tscn
@@ -229,14 +204,6 @@ msgid "Create Registry"
 msgstr ""
 
 #: addons/yard/editor_only/ui_scenes/components/new_registry_dialog.tscn
-msgid "Create"
-msgstr ""
-
-#: addons/yard/editor_only/ui_scenes/components/new_registry_dialog.tscn
-msgid "Remove"
-msgstr ""
-
-#: addons/yard/editor_only/ui_scenes/components/new_registry_dialog.tscn
 msgid ""
 "Some of the entries in the registry do not match the\n"
 "new class restriction and would be removed.\n"
@@ -261,11 +228,6 @@ msgid "Auto Rescan:"
 msgstr ""
 
 #: addons/yard/editor_only/ui_scenes/components/new_registry_dialog.tscn
-#: addons/yard/editor_only/ui_scenes/components/scan_ruleset_editor/scan_ruleset_editor.tscn
-msgid "On"
-msgstr ""
-
-#: addons/yard/editor_only/ui_scenes/components/new_registry_dialog.tscn
 msgid "Remove entries whose file no longer exists in the scan directory, or no longer matches any scan ruleset."
 msgstr ""
 
@@ -275,14 +237,6 @@ msgstr ""
 
 #: addons/yard/editor_only/ui_scenes/components/new_registry_dialog.tscn
 msgid "Path to the registry file."
-msgstr ""
-
-#: addons/yard/editor_only/ui_scenes/components/new_registry_dialog.tscn
-msgid "Path:"
-msgstr ""
-
-#: addons/yard/editor_only/ui_scenes/components/new_registry_dialog.tscn
-msgid "Advanced Settings"
 msgstr ""
 
 #: addons/yard/editor_only/ui_scenes/registry_editor.gd
@@ -306,23 +260,11 @@ msgid "Freeze ID Columns"
 msgstr ""
 
 #: addons/yard/editor_only/ui_scenes/registry_editor.tscn
-msgid "File"
-msgstr ""
-
-#: addons/yard/editor_only/ui_scenes/registry_editor.tscn
 msgid "New Registry..."
 msgstr ""
 
 #: addons/yard/editor_only/ui_scenes/registry_editor.tscn
-msgid "Open..."
-msgstr ""
-
-#: addons/yard/editor_only/ui_scenes/registry_editor.tscn
 msgid "Reopen Closed Registry"
-msgstr ""
-
-#: addons/yard/editor_only/ui_scenes/registry_editor.tscn
-msgid "Open Recent"
 msgstr ""
 
 #: addons/yard/editor_only/ui_scenes/registry_editor.tscn
@@ -331,26 +273,6 @@ msgstr ""
 
 #: addons/yard/editor_only/ui_scenes/registry_editor.tscn
 msgid "Copy Registry UID"
-msgstr ""
-
-#: addons/yard/editor_only/ui_scenes/registry_editor.tscn
-msgid "Close"
-msgstr ""
-
-#: addons/yard/editor_only/ui_scenes/registry_editor.tscn
-msgid "Close All"
-msgstr ""
-
-#: addons/yard/editor_only/ui_scenes/registry_editor.tscn
-msgid "Close Other Tabs"
-msgstr ""
-
-#: addons/yard/editor_only/ui_scenes/registry_editor.tscn
-msgid "Close Tabs Below"
-msgstr ""
-
-#: addons/yard/editor_only/ui_scenes/registry_editor.tscn
-msgid "Edit"
 msgstr ""
 
 #: addons/yard/editor_only/ui_scenes/registry_editor.tscn
@@ -419,18 +341,6 @@ msgstr ""
 
 #: addons/yard/editor_only/ui_scenes/registry_editor.tscn
 msgid "Filter Registries"
-msgstr ""
-
-#: addons/yard/editor_only/ui_scenes/registry_editor.tscn
-msgid "Move Up"
-msgstr ""
-
-#: addons/yard/editor_only/ui_scenes/registry_editor.tscn
-msgid "Move Down"
-msgstr ""
-
-#: addons/yard/editor_only/ui_scenes/registry_editor.tscn
-msgid "Sort"
 msgstr ""
 
 #: addons/yard/plugin.gd

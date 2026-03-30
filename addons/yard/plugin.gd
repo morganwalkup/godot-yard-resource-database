@@ -3,8 +3,8 @@ extends EditorPlugin
 
 const Namespace := preload("res://addons/yard/editor_only/namespace.gd")
 const RegistryEditor := Namespace.RegistryEditor
+const TRANSLATIONS := Namespace.TRANSLATIONS
 const REGISTRY_EDITOR_SCENE := Namespace.REGISTRY_EDITOR_SCENE
-const TRANSLATION_DOMAIN := Namespace.TRANSLATION_DOMAIN
 const FILESYSTEM_CREATE_CONTEXT_MENU_PLUGIN := Namespace.FILESYSTEM_CREATE_CONTEXT_MENU_PLUGIN
 const EDITOR_INSPECTOR_PLUGIN := Namespace.EDITOR_INSPECTOR_PLUGIN
 
@@ -18,10 +18,10 @@ func _init() -> void:
 		return
 
 	print("YARD - Yet Another Resource Database")
-	var domain := TranslationServer.get_or_add_domain(TRANSLATION_DOMAIN)
-	for locale: String in Namespace.TRANSLATIONS.keys():
-		domain.add_translation(load(Namespace.TRANSLATIONS[locale]))
-	set_translation_domain(TRANSLATION_DOMAIN)
+
+	var editor_domain := TranslationServer.get_or_add_domain(&"godot.editor")
+	for locale: String in TRANSLATIONS.keys():
+		editor_domain.add_translation(load(TRANSLATIONS[locale]))
 
 
 func _enter_tree() -> void:
@@ -35,7 +35,6 @@ func _enter_tree() -> void:
 
 	_registry_editor = REGISTRY_EDITOR_SCENE.instantiate()
 	EditorInterface.get_editor_main_screen().add_child(_registry_editor)
-	_registry_editor.set_translation_domain(TRANSLATION_DOMAIN)
 
 	_reimport_icons()
 	_make_visible(false)
@@ -47,8 +46,6 @@ func _exit_tree() -> void:
 
 	if is_instance_valid(_filesystem_create_context_menu_plugin):
 		remove_context_menu_plugin(_filesystem_create_context_menu_plugin)
-
-	TranslationServer.remove_domain(TRANSLATION_DOMAIN)
 
 
 func _has_main_screen() -> bool:

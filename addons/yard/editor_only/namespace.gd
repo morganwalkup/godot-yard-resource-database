@@ -23,7 +23,6 @@ const REGISTRY_TABLE_VIEW_SCENE := preload("res://addons/yard/editor_only/ui_sce
 # Misc
 const FILESYSTEM_CREATE_CONTEXT_MENU_PLUGIN = preload("res://addons/yard/editor_only/editor_context_menu_plugin.gd")
 const EDITOR_INSPECTOR_PLUGIN = preload("res://addons/yard/editor_only/editor_inspector_plugin.gd")
-const TRANSLATION_DOMAIN := "com.elliotfontaine.yard"
 const TRANSLATIONS := {
 	"de_DE": "res://addons/yard/editor_only/locale/de_DE.po",
 	"en_US": "res://addons/yard/editor_only/locale/en_US.po",
