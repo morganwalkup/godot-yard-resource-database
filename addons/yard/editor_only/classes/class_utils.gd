@@ -82,6 +82,96 @@ static func get_script_inheritance_list(script: Script, include_self: bool = fal
 	return result
 
 
+## Returns the full inheritance chain of [param script] as an array of strings.
+## [br]Script ancestors are represented by their global class name, or by their
+## [code]resource_path[/code] if no [code]class_name[/code] is declared.
+## Native class ancestors are appended after the script chain.
+## [br]If [param include_self] is [code]true[/code], [param script] itself is included first.
+static func get_script_inheritance_list_strings(script: Script, include_self: bool = false) -> Array[String]:
+	var inheritance_list_builtin := get_inheritance_list(script)
+	var inheritance_script_list := get_script_inheritance_list(script, include_self)
+	var inheritance_script_list_string: Array[String]
+	for s: Script in inheritance_script_list:
+		inheritance_script_list_string.append(str(s.get_global_name()) if s.get_global_name() else s.resource_path)
+
+	return inheritance_script_list_string + inheritance_list_builtin
+
+
+## Sorts an array of class identifiers so that parent classes always appear before child classes.
+## [br]Each element can be a class name or builtin (e.g. [code]"Node"[/code])
+## or a script path (e.g. [code]"res://my_class.gd"[/code]).
+## [br]Returns a new sorted array. Elements that cannot be resolved are kept in place.
+static func sort_by_inheritance(classes_names: Array[String]) -> Array[String]:
+	var n := classes_names.size()
+	if n <= 1:
+		return classes_names.duplicate()
+
+	# Returns all ancestor class names/paths for a given entry, with caching
+	var cache := { }
+	var ancestors_of := func(entry: String) -> Array:
+		if entry not in cache:
+			cache[entry] = (get_script_inheritance_list_strings(load(entry), false)
+				if entry.begins_with("res://")
+				else get_inheritance_list(entry, false) )
+		return cache[entry]
+
+	# Build graph: edge i→j means class[i] is ancestor of class[j] (must come before)
+	var in_degree := PackedInt32Array()
+	in_degree.resize(n)
+	var adj: Array[Array] = []
+	adj.resize(n)
+	for i in n:
+		adj[i] = []
+		for j in n:
+			if i != j and ancestors_of.call(classes_names[j]).has(classes_names[i]):
+				adj[i].append(j)
+				in_degree[j] += 1
+
+	# Kahn's topological sort
+	var queue: Array[int]
+	var result: Array[String] = []
+	queue.assign(range(n).filter(func(i: int) -> bool: return in_degree[i] == 0))
+	while not queue.is_empty():
+		var idx: int = queue.pop_front()
+		result.append(classes_names[idx])
+		for j: int in adj[idx]:
+			in_degree[j] -= 1
+			if in_degree[j] == 0:
+				queue.append(j)
+
+	return result
+
+
+## Given that [param property_info] is a class descriptor from get_property_list(),
+## returns the class name or the script path if no name declared.
+static func get_class_name_or_path_from_prop(property_info: Dictionary) -> String:
+	if not is_class_property(property_info):
+		return ""
+
+	var prop_name: String = property_info[&"name"]
+	var hint_string: String = property_info[&"hint_string"]
+	if not hint_string.begins_with("res://"):
+		return prop_name
+
+	var script := load(hint_string) as Script
+	if not (script and script is Script):
+		return prop_name
+
+	var global_name := script.get_global_name()
+	return str(global_name) if global_name else hint_string
+
+
+## Returns [code]true[/code] if [param property_info] is a class descriptor entry
+## from [method Object.get_property_list].
+static func is_class_property(property_info: Dictionary) -> bool:
+	return (
+		property_info[&"name"] != ""
+		and property_info[&"type"] == TYPE_NIL
+		and property_info[&"usage"] & (PROPERTY_USAGE_CATEGORY | PROPERTY_USAGE_GROUP) != 0
+		and property_info[&"hint_string"] != ""
+	)
+
+
 ## Returns the type name of any given type or it's instance.
 ## [br][br][param obj]: Accepts anything other than built-in Variant types directly.
 ## [br] This includes Native Classes, user-defined Scripts,

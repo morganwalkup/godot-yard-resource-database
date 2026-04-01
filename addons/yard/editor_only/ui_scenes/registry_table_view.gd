@@ -321,18 +321,18 @@ func is_property_disabled(property_info: Dictionary) -> bool:
 
 func set_columns_data(resources: Array[Resource]) -> void:
 	properties_column_info.clear()
-	var found_props := { }
-	for res: Resource in resources:
-		if not res:
-			continue
+	var found_props := _collect_props(resources)
+	var grouped := _group_props_by_class(found_props)
 
-		for prop: Dictionary in res.get_property_list():
-			found_props[prop[&"name"]] = prop
-			prop[&"owner_object"] = res
+	var ordered_groups: Array[String] = ClassUtils.sort_by_inheritance(grouped.keys())
+	if not current_cache_data.parent_props_first:
+		ordered_groups.reverse()
 
-	for prop: Dictionary in found_props.values():
-		if _can_display_property(prop):
-			properties_column_info.append(prop)
+	for class_str: String in ordered_groups:
+		for prop_name: StringName in grouped[class_str]:
+			var prop := found_props[prop_name]
+			if _can_display_property(prop) or ClassUtils.is_class_property(prop):
+				properties_column_info.append(prop)
 
 
 func get_res_row_data(res: Resource) -> Array[Variant]:
@@ -341,7 +341,7 @@ func get_res_row_data(res: Resource) -> Array[Variant]:
 
 	var row: Array[Variant] = []
 	for prop: Dictionary in properties_column_info:
-		if is_property_disabled(prop):
+		if is_property_disabled(prop) or ClassUtils.is_class_property(prop):
 			continue
 		if prop[&"name"] in res:
 			row.append(res.get(prop[&"name"]))
@@ -394,21 +394,6 @@ func toggle_edit_menu_items(edit_menu: PopupMenu) -> void:
 		edit_menu.set_item_text(edit_menu.get_item_index(EditMenuAction.DELETE_ENTRIES), "Delete Entry")
 
 
-func _on_drag_begin() -> void:
-	if not current_registry:
-		drag_and_drop_info_panel.visible = false
-		return
-	var drag_data: Variant = get_viewport().gui_get_drag_data()
-	var can_drop := drag_data != null and _can_drop_data(Vector2.ZERO, drag_data)
-	drag_and_drop_info_panel.visible = can_drop or current_registry.is_empty()
-	focus_panel.visible = can_drop
-
-
-func _on_drag_end() -> void:
-	drag_and_drop_info_panel.hide()
-	focus_panel.hide()
-
-
 func _build_columns() -> Array[DynamicTable.ColumnConfig]:
 	var columns: Array[DynamicTable.ColumnConfig] = []
 
@@ -448,6 +433,36 @@ func _build_columns() -> Array[DynamicTable.ColumnConfig]:
 		columns.append(column)
 
 	return columns
+
+
+func _collect_props(resources: Array[Resource]) -> Dictionary[StringName, Dictionary]:
+	var found_props: Dictionary[StringName, Dictionary] = { }
+	for res: Resource in resources:
+		if res:
+			for prop: Dictionary in res.get_property_list():
+				prop[&"owner_object"] = res
+				found_props[prop[&"name"]] = prop
+	return found_props
+
+
+func _group_props_by_class(found_props: Dictionary) -> Dictionary[String, Array]:
+	var grouped: Dictionary[String, Array] = { }
+	var current_group: Array[String] = []
+	var current_class: String
+
+	for prop: Dictionary in found_props.values():
+		if ClassUtils.is_class_property(prop):
+			if current_group.size() > 0:
+				grouped[current_class] = current_group
+			current_group = [prop[&"name"]]
+			current_class = ClassUtils.get_class_name_or_path_from_prop(prop)
+		else:
+			current_group.append(prop[&"name"])
+
+	if current_group.size() > 0:
+		grouped[current_class] = current_group
+
+	return grouped
 
 
 func _can_display_property(property_info: Dictionary) -> bool:
@@ -602,6 +617,21 @@ func _print_fake_error(message: String) -> void:
 			message,
 		],
 	)
+
+
+func _on_drag_begin() -> void:
+	if not current_registry:
+		drag_and_drop_info_panel.visible = false
+		return
+	var drag_data: Variant = get_viewport().gui_get_drag_data()
+	var can_drop := drag_data != null and _can_drop_data(Vector2.ZERO, drag_data)
+	drag_and_drop_info_panel.visible = can_drop or current_registry.is_empty()
+	focus_panel.visible = can_drop
+
+
+func _on_drag_end() -> void:
+	drag_and_drop_info_panel.hide()
+	focus_panel.hide()
 
 
 func _on_cell_selected(row: int, column: int) -> void:
