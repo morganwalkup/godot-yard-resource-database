@@ -591,12 +591,9 @@ func _open_path_editor(row: int, col: int) -> void:
 	_editing_cell = [row, col]
 	var column := get_column(col)
 	if column.property_hint in [PROPERTY_HINT_FILE, PROPERTY_HINT_FILE_PATH]:
-		_path_editor.file_mode = EditorFileDialog.FILE_MODE_SAVE_FILE
-		_path_editor.title = "Select a File"
-		_path_editor.ok_button_text = "Select"
+		_path_editor.file_mode = EditorFileDialog.FILE_MODE_OPEN_FILE
 	if column.property_hint in [PROPERTY_HINT_DIR]:
 		_path_editor.file_mode = EditorFileDialog.FILE_MODE_OPEN_DIR
-		_path_editor.title = "Select a Directory"
 	var current_path := ResourceUID.ensure_path(get_cell_value(row, col))
 	_path_editor.current_dir = current_path.get_base_dir()
 	_path_editor.current_path = current_path
@@ -879,7 +876,7 @@ func _draw_cell_color(rect: Rect2, row: int, col: int) -> void:
 func _draw_cell_resource(rect: Rect2, row: int, col: int) -> void:
 	var cell_value: Variant = get_cell_value(row, col)
 	if cell_value is not Resource:
-		_draw_cell_text(rect, row, col, "<empty>")
+		_draw_cell_text(rect, row, col, tr("<empty>"))
 		return
 
 	var inner := rect.grow(-2.0)
@@ -1001,7 +998,7 @@ func _draw_cell_collection(rect: Rect2, row: int, col: int) -> void:
 		_draw_cell_text(rect, row, col, _format_collection_text(cell_value, column))
 
 
-static func _format_collection_text(collection: Variant, column: ColumnConfig) -> String:
+func _format_collection_text(collection: Variant, column: ColumnConfig) -> String:
 	var is_dict := collection is Dictionary
 	var items: Array = (collection as Dictionary).keys() if is_dict else (collection as Array)
 	var keys_map: Dictionary = column.enum_keys_map if column.is_enum_key_dictionary_column() else { }
@@ -1023,7 +1020,7 @@ static func _format_collection_text(collection: Variant, column: ColumnConfig) -
 	var result := ", ".join(parts)
 	var remaining := items.size() - 3
 	if remaining > 0:
-		result += " and %d more" % remaining
+		result += tr(" and {remaining} more").format({ &"remaining": remaining })
 	return "{ %s }" % result if is_dict else "[%s]" % result
 
 
