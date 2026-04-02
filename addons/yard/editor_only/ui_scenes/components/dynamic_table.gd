@@ -582,7 +582,7 @@ func _open_resource_editor(row: int, col: int) -> void:
 			_resource_editor.base_type = ",".join(valid_types)
 
 	for child in _resource_editor.get_children(true):
-		if child is Button and child.tooltip_text == tr("Quick Load"):
+		if child is Button and child.tooltip_text == "Quick Load":
 			child.pressed.emit()
 			break
 
