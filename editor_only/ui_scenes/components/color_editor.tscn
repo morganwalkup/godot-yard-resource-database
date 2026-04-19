@@ -1,12 +1,12 @@
-[gd_scene load_steps=4 format=3 uid="uid://cuhed17jgms48"]
+[gd_scene format=3 uid="uid://cuhed17jgms48"]
 
 [ext_resource type="Script" uid="uid://2xver6rxjvvu" path="res://addons/yard/editor_only/ui_scenes/components/color_editor.gd" id="1_4lnk3"]
 [ext_resource type="Script" uid="uid://djrr6b7fc76rw" path="res://addons/yard/editor_only/classes/editor_icon_button.gd" id="2_7jwya"]
 
 [sub_resource type="StyleBoxFlat" id="StyleBoxFlat_4lnk3"]
-bg_color = Color(0.152, 0.1748, 0.2356, 1)
+bg_color = Color(0.12236, 0.12236, 0.12236, 1)
 
-[node name="ColorEditor" type="PanelContainer"]
+[node name="ColorEditor" type="PanelContainer" unique_id=1736367320]
 top_level = true
 offset_right = 298.0
 offset_bottom = 572.0
@@ -14,32 +14,32 @@ focus_mode = 1
 theme_override_styles/panel = SubResource("StyleBoxFlat_4lnk3")
 script = ExtResource("1_4lnk3")
 
-[node name="MarginContainer" type="MarginContainer" parent="."]
+[node name="MarginContainer" type="MarginContainer" parent="." unique_id=735388457]
 layout_mode = 2
 theme_override_constants/margin_left = 8
 theme_override_constants/margin_top = 8
 theme_override_constants/margin_right = 8
 theme_override_constants/margin_bottom = 8
 
-[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer"]
+[node name="VBoxContainer" type="VBoxContainer" parent="MarginContainer" unique_id=47733230]
 layout_mode = 2
 size_flags_horizontal = 0
 
-[node name="ColorPicker" type="ColorPicker" parent="MarginContainer/VBoxContainer"]
+[node name="ColorPicker" type="ColorPicker" parent="MarginContainer/VBoxContainer" unique_id=332768433]
 unique_name_in_owner = true
 layout_mode = 2
 deferred_mode = true
 presets_visible = false
 
-[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer"]
+[node name="HBoxContainer" type="HBoxContainer" parent="MarginContainer/VBoxContainer" unique_id=1665584860]
 layout_mode = 2
 
-[node name="CancelButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+[node name="CancelButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=666325368]
 unique_name_in_owner = true
 layout_mode = 2
 text = "Cancel"
 
-[node name="SelectButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer"]
+[node name="SelectButton" type="Button" parent="MarginContainer/VBoxContainer/HBoxContainer" unique_id=1647378841]
 unique_name_in_owner = true
 layout_mode = 2
 size_flags_horizontal = 10
